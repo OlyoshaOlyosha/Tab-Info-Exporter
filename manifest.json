@@ -8,15 +8,15 @@
     "default_popup": "popup.html",
     "default_title": "Tab Info Exporter",
     "default_icon": {
-      "48": "icons/icon-48.png",
-      "96": "icons/icon-96.png",
-      "128": "icons/icon-128.png"
+      "48": "icons/icon-48.ico",
+      "96": "icons/icon-96.ico",
+      "128": "icons/icon-128.ico"
     }
   },
   "icons": {
-    "48": "icons/icon-48.png",
-    "96": "icons/icon-96.png",
-    "128": "icons/icon-128.png"
+    "48": "icons/icon-48.ico",
+    "96": "icons/icon-96.ico",
+    "128": "icons/icon-128.ico"
   },
   "background": {
     "scripts": ["background.js"],
