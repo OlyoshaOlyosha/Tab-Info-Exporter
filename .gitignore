@@ -1,0 +1,8 @@
+node_modules/
+web-ext-artifacts/
+.web-extension-id/
+*.zip
+
+# AI config
+.opencode/
+AGENTS.md
