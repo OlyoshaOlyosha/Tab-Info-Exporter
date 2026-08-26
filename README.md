@@ -162,8 +162,8 @@ Released under the MIT License. See the [LICENSE](LICENSE) file.
 The source code lives on GitHub. To report a bug or suggest a feature, open an
 issue there:
 
-- Issues: https://github.com/<your-username>/tab-info-exporter/issues
-- Repository: https://github.com/<your-username>/tab-info-exporter
+- Issues: https://github.com/OlyoshaOlyosha/Tab-Info-Exporter/issues
+- Repository: https://github.com/OlyoshaOlyosha/Tab-Info-Exporter
 
 The published add-on is listed on Mozilla Add-ons (AMO):
 https://addons.mozilla.org/addon/tab-info-exporter/
