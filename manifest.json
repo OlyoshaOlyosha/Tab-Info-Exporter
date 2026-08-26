@@ -3,7 +3,7 @@
   "name": "Tab Info Exporter",
   "version": "1.0.0",
   "default_locale": "en",
-  "description": "Выгрузка списка всех вкладок (название, ссылка, даты) в CSV или JSON через буфер обмена или файл.",
+  "description": "Export metadata of all open tabs (title, URL, dates) to CSV or JSON via clipboard or file download.",
   "action": {
     "default_popup": "popup.html",
     "default_title": "Tab Info Exporter",
