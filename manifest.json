@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Info Exporter",
+  "version": "1.0.0",
+  "description": "Выгрузка списка всех вкладок (название, ссылка, даты) в CSV или JSON через буфер обмена или файл.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Tab Info Exporter"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tab-info-exporter@local"
+    }
+  },
+  "permissions": ["tabs", "storage", "downloads", "clipboardWrite"]
+}
