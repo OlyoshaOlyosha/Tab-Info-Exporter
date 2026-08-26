@@ -6,7 +6,17 @@
   "description": "Выгрузка списка всех вкладок (название, ссылка, даты) в CSV или JSON через буфер обмена или файл.",
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Tab Info Exporter"
+    "default_title": "Tab Info Exporter",
+    "default_icon": {
+      "48": "icons/icon-48.png",
+      "96": "icons/icon-96.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png",
+    "128": "icons/icon-128.png"
   },
   "background": {
     "scripts": ["background.js"],
