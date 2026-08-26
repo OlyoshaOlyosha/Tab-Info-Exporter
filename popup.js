@@ -1,5 +1,5 @@
 // DOM wiring for the popup. All data logic lives in lib.js; this file only
-// reads browser APIs, builds row objects, and renders the UI.
+// reads browser APIs, builds row objects, renders the UI, and translates text.
 
 import {
   FIELD_DEFS,
@@ -10,19 +10,33 @@ import {
   sortRows,
   formatIso,
 } from './lib.js';
+import {
+  DEFAULT_LANG,
+  SUPPORTED_LANGS,
+  loadMessages,
+  t,
+} from './i18n.js';
 
 const els = {
   count: document.getElementById('count'),
   sort: document.getElementById('sort'),
+  sortLabelText: document.getElementById('sortLabelText'),
   fields: document.getElementById('fields'),
+  fieldsLegend: document.getElementById('fieldsLegend'),
+  formatLegend: document.getElementById('formatLegend'),
+  fmtCsv: document.getElementById('fmtCsv'),
+  fmtJson: document.getElementById('fmtJson'),
   copy: document.getElementById('copy'),
   download: document.getElementById('download'),
+  lang: document.getElementById('lang'),
+  langLabelText: document.getElementById('langLabelText'),
   status: document.getElementById('status'),
 };
 
-// Tab rows held in raw form (epoch ms for date fields). On export the date
-// fields are formatted to ISO 8601 strings via toExportRow.
+let tr = (k) => k; // current translator, (re)assigned on language load
+let currentLang = DEFAULT_LANG;
 let rows = [];
+let rowCount = 0;
 
 const DATE_KEYS = new Set(['openedAt', 'lastAccessedAt']);
 
@@ -74,17 +88,42 @@ function getPayload() {
   return isJson() ? buildJson(view, fields) : buildCsv(view, fields);
 }
 
-function renderSortOptions() {
+// (Re)build all visible strings and dynamic controls. Safe to call on init and
+// whenever the language changes.
+function renderAll() {
+  els.count.textContent = tr('count_prefix') + rowCount;
+  els.sortLabelText.textContent = tr('sort_label');
+  els.fieldsLegend.textContent = tr('fields_label');
+  els.formatLegend.textContent = tr('format_label');
+  els.fmtCsv.textContent = tr('format_csv');
+  els.fmtJson.textContent = tr('format_json');
+  els.copy.textContent = tr('copy');
+  els.download.textContent = tr('download');
+  els.langLabelText.textContent = tr('lang_label');
+
+  // Language options.
+  els.lang.replaceChildren();
+  for (const lang of SUPPORTED_LANGS) {
+    const opt = document.createElement('option');
+    opt.value = lang;
+    opt.textContent = tr(lang === 'en' ? 'lang_en' : 'lang_ru');
+    els.lang.appendChild(opt);
+  }
+  els.lang.value = currentLang;
+
+  // Sort options, preserving the user's selection across re-renders.
+  const prevSort = els.sort.value;
+  els.sort.replaceChildren();
   for (const s of SORT_DEFS) {
     const opt = document.createElement('option');
     opt.value = s.key;
-    opt.textContent = s.label;
-    if (s.key === 'accessOld') opt.selected = true;
+    opt.textContent = tr(s.msgKey);
     els.sort.appendChild(opt);
   }
-}
+  els.sort.value = prevSort || 'accessOld';
 
-function renderFieldCheckboxes() {
+  // Field checkboxes.
+  els.fields.replaceChildren();
   for (const f of FIELD_DEFS) {
     const label = document.createElement('label');
     label.className = 'field';
@@ -92,28 +131,44 @@ function renderFieldCheckboxes() {
     cb.type = 'checkbox';
     cb.value = f.key;
     cb.checked = DEFAULT_FIELD_KEYS.includes(f.key);
-    label.append(cb, ' ' + f.label);
+    label.append(cb, ' ' + tr(f.msgKey));
     els.fields.appendChild(label);
   }
 }
 
-async function init() {
-  renderSortOptions();
-  renderFieldCheckboxes();
+async function applyLang(lang) {
+  currentLang = lang;
+  const M = await loadMessages(lang);
+  tr = (k) => t(M, k);
+}
 
-  const stored = await browser.storage.local.get('firstSeen');
-  const firstSeen = stored.firstSeen || {};
+async function init() {
+  const stored = await browser.storage.local.get('uiLang');
+  const uiLang = SUPPORTED_LANGS.includes(stored.uiLang) ? stored.uiLang : DEFAULT_LANG;
+  await applyLang(uiLang);
+
+  const storedFs = await browser.storage.local.get('firstSeen');
+  const firstSeen = storedFs.firstSeen || {};
   const tabs = await browser.tabs.query({});
   rows = tabs.map((t) => buildRowFromTab(t, firstSeen));
-  els.count.textContent = 'Вкладок: ' + rows.length;
+  rowCount = rows.length;
+
+  renderAll();
 }
+
+els.lang.addEventListener('change', async () => {
+  const uiLang = els.lang.value;
+  await browser.storage.local.set({ uiLang });
+  await applyLang(uiLang);
+  renderAll();
+});
 
 els.copy.addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(getPayload());
-    setStatus('Скопировано ✓');
+    setStatus(tr('status_copied'));
   } catch {
-    setStatus('❌ Не удалось скопировать');
+    setStatus(tr('status_copy_failed'));
   }
 });
 
@@ -125,9 +180,9 @@ els.download.addEventListener('click', async () => {
   try {
     const filename = 'tabs_' + new Date().toISOString().slice(0, 10) + ext;
     await browser.downloads.download({ url, filename, saveAs: false });
-    setStatus('✅ Файл сохранён');
+    setStatus(tr('status_saved'));
   } catch {
-    setStatus('❌ Ошибка сохранения');
+    setStatus(tr('status_save_failed'));
   } finally {
     URL.revokeObjectURL(url);
   }

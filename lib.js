@@ -2,34 +2,35 @@
 // both popup.js (browser) and node --test.
 
 // Field definitions, in display order. The first four are on by default in the
-// popup UI; DEFAULT_FIELD_KEYS carries that fact so FIELD_DEFS stays {key,label}.
+// popup UI; DEFAULT_FIELD_KEYS carries that fact so FIELD_DEFS stays
+// {key, msgKey}. msgKey is resolved to a user-facing string via i18n.js.
 export const FIELD_DEFS = [
-  { key: 'title', label: 'Название' },
-  { key: 'url', label: 'Ссылка' },
-  { key: 'openedAt', label: 'Дата открытия' },
-  { key: 'lastAccessedAt', label: 'Дата последнего доступа' },
-  { key: 'id', label: 'ID' },
-  { key: 'windowId', label: 'Окно' },
-  { key: 'index', label: 'Позиция' },
-  { key: 'active', label: 'Активна' },
-  { key: 'pinned', label: 'Закреплена' },
-  { key: 'audible', label: 'Звук' },
-  { key: 'discarded', label: 'Выгружена' },
-  { key: 'favIconUrl', label: 'Иконка' },
+  { key: 'title', msgKey: 'field_title' },
+  { key: 'url', msgKey: 'field_url' },
+  { key: 'openedAt', msgKey: 'field_openedAt' },
+  { key: 'lastAccessedAt', msgKey: 'field_lastAccessedAt' },
+  { key: 'id', msgKey: 'field_id' },
+  { key: 'windowId', msgKey: 'field_windowId' },
+  { key: 'index', msgKey: 'field_index' },
+  { key: 'active', msgKey: 'field_active' },
+  { key: 'pinned', msgKey: 'field_pinned' },
+  { key: 'audible', msgKey: 'field_audible' },
+  { key: 'discarded', msgKey: 'field_discarded' },
+  { key: 'favIconUrl', msgKey: 'field_favIconUrl' },
 ];
 
 export const DEFAULT_FIELD_KEYS = ['title', 'url', 'openedAt', 'lastAccessedAt'];
 
 export const SORT_DEFS = [
-  { key: 'accessOld', label: 'Доступ: старые сверху' },
-  { key: 'accessNew', label: 'Доступ: новые сверху' },
-  { key: 'openOld', label: 'Открытие: старые сверху' },
-  { key: 'openNew', label: 'Открытие: новые сверху' },
-  { key: 'titleAsc', label: 'Название А→Я' },
-  { key: 'titleDesc', label: 'Название Я→А' },
-  { key: 'urlAsc', label: 'Ссылка А→Я' },
-  { key: 'urlDesc', label: 'Ссылка Я→А' },
-  { key: 'browserOrder', label: 'Порядок браузера' },
+  { key: 'accessOld', msgKey: 'sort_accessOld' },
+  { key: 'accessNew', msgKey: 'sort_accessNew' },
+  { key: 'openOld', msgKey: 'sort_openOld' },
+  { key: 'openNew', msgKey: 'sort_openNew' },
+  { key: 'titleAsc', msgKey: 'sort_titleAsc' },
+  { key: 'titleDesc', msgKey: 'sort_titleDesc' },
+  { key: 'urlAsc', msgKey: 'sort_urlAsc' },
+  { key: 'urlDesc', msgKey: 'sort_urlDesc' },
+  { key: 'browserOrder', msgKey: 'sort_browserOrder' },
 ];
 
 // Finite ms -> ISO 8601 string; anything else -> "".

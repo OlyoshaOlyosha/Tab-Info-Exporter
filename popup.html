@@ -105,29 +105,34 @@
   </head>
   <body>
     <h1>Tab Info Exporter</h1>
-    <div id="count">Вкладок: …</div>
+    <div id="count"></div>
 
     <label>
-      Сортировка
+      <span id="langLabelText"></span>
+      <select id="lang"></select>
+    </label>
+
+    <label>
+      <span id="sortLabelText"></span>
       <select id="sort"></select>
     </label>
 
     <fieldset>
-      <legend>Поля</legend>
+      <legend id="fieldsLegend"></legend>
       <div id="fields" class="field-grid"></div>
     </fieldset>
 
     <fieldset>
-      <legend>Формат</legend>
+      <legend id="formatLegend"></legend>
       <div class="format">
-        <label class="field"><input type="radio" name="format" value="csv" checked /> CSV</label>
-        <label class="field"><input type="radio" name="format" value="json" /> JSON</label>
+        <label class="field"><input type="radio" name="format" value="csv" checked /> <span id="fmtCsv"></span></label>
+        <label class="field"><input type="radio" name="format" value="json" /> <span id="fmtJson"></span></label>
       </div>
     </fieldset>
 
     <div class="actions">
-      <button id="copy" class="primary">Копировать</button>
-      <button id="download">Скачать файл</button>
+      <button id="copy" class="primary"></button>
+      <button id="download"></button>
     </div>
 
     <div id="status"></div>
