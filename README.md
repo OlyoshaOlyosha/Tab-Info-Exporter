@@ -137,8 +137,7 @@ The extension reads these three icon files:
 - `icons/icon-96.png`
 - `icons/icon-128.png`
 
-Placeholder icons are committed. Replace these three files with your own design,
-keeping the same names and sizes.
+These icon files are committed in this repository. Replace them with your own artwork (same filenames and sizes) to customize the toolbar and extension icon.
 
 ## Localization (for contributors)
 
@@ -153,3 +152,18 @@ UI strings live in `_locales/<code>/messages.json`. To add a language:
 English is the default and the fallback: if a locale file is missing or
 malformed, the UI falls back to English, and any missing key renders as its key
 rather than breaking the layout.
+
+## License
+
+Released under the MIT License. See the [LICENSE](LICENSE) file.
+
+## Source & feedback
+
+The source code lives on GitHub. To report a bug or suggest a feature, open an
+issue there:
+
+- Issues: https://github.com/<your-username>/tab-info-exporter/issues
+- Repository: https://github.com/<your-username>/tab-info-exporter
+
+The published add-on is listed on Mozilla Add-ons (AMO):
+https://addons.mozilla.org/addon/tab-info-exporter/
