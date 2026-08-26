@@ -153,8 +153,3 @@ UI strings live in `_locales/<code>/messages.json`. To add a language:
 English is the default and the fallback: if a locale file is missing or
 malformed, the UI falls back to English, and any missing key renders as its key
 rather than breaking the layout.
-
-## Publishing to AMO
-
-To publish: package the extension folder as a ZIP with `manifest.json` at the
-top level and submit it through the AMO Developer Hub.
