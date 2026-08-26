@@ -8,6 +8,7 @@ import {
   buildCsv,
   buildJson,
   sortRows,
+  formatIso,
 } from './lib.js';
 
 const els = {
@@ -19,8 +20,19 @@ const els = {
   status: document.getElementById('status'),
 };
 
-// Raw tab rows (epoch ms for dates). Rebuilt on load.
+// Tab rows held in raw form (epoch ms for date fields). On export the date
+// fields are formatted to ISO 8601 strings via toExportRow.
 let rows = [];
+
+const DATE_KEYS = new Set(['openedAt', 'lastAccessedAt']);
+
+// Convert a raw row to its export shape: date fields become ISO 8601 strings
+// (formatIso returns "" for null/missing), all other fields pass through.
+function toExportRow(r) {
+  const out = {};
+  for (const k in r) out[k] = DATE_KEYS.has(k) ? formatIso(r[k]) : r[k];
+  return out;
+}
 
 function setStatus(msg) {
   els.status.textContent = msg;
@@ -58,7 +70,8 @@ function isJson() {
 function getPayload() {
   const fields = getSelectedFields();
   const sorted = sortRows(rows, els.sort.value);
-  return isJson() ? buildJson(sorted, fields) : buildCsv(sorted, fields);
+  const view = sorted.map(toExportRow);
+  return isJson() ? buildJson(view, fields) : buildCsv(view, fields);
 }
 
 function renderSortOptions() {
