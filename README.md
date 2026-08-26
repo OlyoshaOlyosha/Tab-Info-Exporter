@@ -156,8 +156,5 @@ rather than breaking the layout.
 
 ## Publishing to AMO
 
-To release on addons.mozilla.org (AMO): package the extension folder as a ZIP
-file (with `manifest.json` at the top level, no extra nesting) and submit it via
-the AMO Developer Hub. The extension already targets Manifest V3 and sets a
-`browser_specific_settings.gecko.id`, which AMO requires for signing MV3
-extensions. No code changes are needed for submission.
+To publish: package the extension folder as a ZIP with `manifest.json` at the
+top level and submit it through the AMO Developer Hub.
