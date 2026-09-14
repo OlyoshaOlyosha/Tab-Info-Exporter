@@ -40,5 +40,6 @@
   "sort_browserOrder": { "message": "Порядок браузера" },
   "groupByDomain": { "message": "По доменам" },
   "preview_empty_fields": { "message": "(выберите хотя бы одно поле)" },
-  "preview_empty_tabs": { "message": "(нет вкладок)" }
+  "preview_empty_tabs": { "message": "(нет вкладок)" },
+    "showDomainCounts": { "message": "Число вкладок в заголовках доменов" }
 }

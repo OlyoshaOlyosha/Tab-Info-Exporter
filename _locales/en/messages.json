@@ -40,5 +40,6 @@
   "sort_browserOrder": { "message": "Browser order" },
   "groupByDomain": { "message": "Group by domain" },
   "preview_empty_fields": { "message": "(select at least one field)" },
-  "preview_empty_tabs": { "message": "(no tabs)" }
+  "preview_empty_tabs": { "message": "(no tabs)" },
+    "showDomainCounts": { "message": "Show count in domain headers" }
 }

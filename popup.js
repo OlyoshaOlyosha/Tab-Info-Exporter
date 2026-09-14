@@ -39,6 +39,9 @@ const els = {
   preview: document.getElementById('preview'),
   groupByDomain: document.getElementById('groupByDomain'),
   groupByDomainLabel: document.getElementById('groupByDomainLabel'),
+  showDomainCounts: document.getElementById('showDomainCounts'),
+  showDomainCountsLabel: document.getElementById('showDomainCountsLabel'),
+  showDomainCountsWrap: document.getElementById('showDomainCountsWrap'),
 };
 
 const SETTINGS_KEY = 'uiSettings';
@@ -47,6 +50,7 @@ const DEFAULT_SETTINGS = {
   sort: 'accessOld',
   fields: DEFAULT_FIELD_KEYS.slice(),
   groupByDomain: false,
+  showDomainCounts: false,
 };
 
 async function loadSettings() {
@@ -59,6 +63,7 @@ async function loadSettings() {
       ? s.fields.filter((k) => FIELD_DEFS.some((f) => f.key === k))
       : DEFAULT_SETTINGS.fields.slice(),
     groupByDomain: !!s.groupByDomain,
+    showDomainCounts: !!s.showDomainCounts,
   };
 }
 
@@ -68,6 +73,7 @@ async function saveSettings() {
     sort: els.sort.value,
     fields: getSelectedFields(),
     groupByDomain: els.groupByDomain.checked,
+    showDomainCounts: els.showDomainCounts.checked,
   };
   await browser.storage.local.set({ [SETTINGS_KEY]: settings });
 }
@@ -135,11 +141,12 @@ function buildOutput(format) {
   if (format === 'json') {
     return buildJson(sorted.map(toExportRow), fields);
   }
+  const showCounts = els.showDomainCounts.checked;
   if (format === 'txt') {
-    return buildText(sorted.map(toExportRow), fields, groupByDomain);
+    return buildText(sorted.map(toExportRow), fields, groupByDomain, showCounts);
   }
   if (format === 'md') {
-    return buildMarkdown(sorted.map(toExportRow), fields, groupByDomain);
+    return buildMarkdown(sorted.map(toExportRow), fields, groupByDomain, showCounts);
   }
   return '';
 }
@@ -257,6 +264,7 @@ function renderAll() {
   els.download.textContent = tr('download');
   els.langLabelText.textContent = tr('lang_label');
   els.groupByDomainLabel.textContent = tr('groupByDomain');
+    els.showDomainCountsLabel.textContent = tr('showDomainCounts');
 
   // Language options.
   els.lang.replaceChildren();
@@ -296,7 +304,15 @@ function renderAll() {
   }
 }
 
+function updateDomainCountVisibility() {
+  const useful =
+    (currentFormat === 'md' || currentFormat === 'txt') &&
+    els.groupByDomain.checked;
+  els.showDomainCountsWrap.hidden = !useful;
+}
+
 function onAnyChange() {
+  updateDomainCountVisibility();
   saveSettings();
   renderPreview();
 }
@@ -330,10 +346,12 @@ async function init() {
 
   // Restore groupByDomain
   els.groupByDomain.checked = currentSettings.groupByDomain;
+  els.showDomainCounts.checked = currentSettings.showDomainCounts;
 
   // Restore sort (renderAll will use currentSettings.sort)
   els.sort.value = currentSettings.sort;
 
+  updateDomainCountVisibility();
   renderAll();
   renderPreview();
 }
@@ -368,10 +386,12 @@ els.lang.addEventListener('change', async () => {
 
 els.sort.addEventListener('change', onAnyChange);
 els.groupByDomain.addEventListener('change', onAnyChange);
+els.showDomainCounts.addEventListener('change', onAnyChange);
 
 document.querySelectorAll('input[name="format"]').forEach((radio) => {
   radio.addEventListener('change', (e) => {
     currentFormat = e.target.value;
+    updateDomainCountVisibility();
     saveSettings();
     renderPreview();
   });

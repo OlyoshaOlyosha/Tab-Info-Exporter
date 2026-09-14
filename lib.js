@@ -127,7 +127,7 @@ export function groupByDomain(rows) {
 // title+url become a clickable link, url-only becomes a bare link,
 // title-only is plain text, and every other checked field renders as
 // `key: value`.
-export function buildMarkdown(rows, fields, grouped) {
+export function buildMarkdown(rows, fields, grouped, showCounts) {
   if (!rows.length || !fields.length) return '';
   const hasTitle = fields.includes('title');
   const hasUrl = fields.includes('url');
@@ -150,7 +150,8 @@ export function buildMarkdown(rows, fields, grouped) {
     const groups = groupByDomain(rows);
     const parts = [];
     for (const [domain, domainRows] of groups) {
-      parts.push(`## ${domain}`);
+      const header = showCounts ? `## ${domain} (${domainRows.length})` : `## ${domain}`;
+      parts.push(header);
       for (const row of domainRows) parts.push(renderRow(row));
     }
     return parts.join('\n\n');
@@ -163,7 +164,7 @@ export function buildMarkdown(rows, fields, grouped) {
 // title+url become `title (url)`, url-only becomes the bare url,
 // title-only is plain text, and every other checked field renders as
 // `key: value`.
-export function buildText(rows, fields, grouped) {
+export function buildText(rows, fields, grouped, showCounts) {
   if (!rows.length || !fields.length) return '';
   const hasTitle = fields.includes('title');
   const hasUrl = fields.includes('url');
@@ -186,7 +187,10 @@ export function buildText(rows, fields, grouped) {
     const groups = groupByDomain(rows);
     const parts = [];
     for (const [domain, domainRows] of groups) {
-      parts.push(`=== ${domain} ===`);
+      const header = showCounts
+        ? `=== ${domain} (${domainRows.length}) ===`
+        : `=== ${domain} ===`;
+      parts.push(header);
       for (const row of domainRows) parts.push(renderRow(row));
     }
     return parts.join('\n\n');

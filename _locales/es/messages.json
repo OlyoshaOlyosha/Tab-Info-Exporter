@@ -40,5 +40,6 @@
   "sort_browserOrder": {"message": "Orden del navegador"},
   "groupByDomain": {"message": "Por dominio"},
   "preview_empty_fields": { "message": "(selecciona al menos un campo)" },
-  "preview_empty_tabs": { "message": "(no hay pestañas)" }
+  "preview_empty_tabs": { "message": "(no hay pestañas)" },
+    "showDomainCounts": { "message": "Mostrar cantidad en dominios" }
 }
