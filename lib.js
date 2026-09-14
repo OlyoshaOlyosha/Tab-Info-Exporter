@@ -119,7 +119,7 @@ export function groupByDomain(rows) {
     if (!map.has(dom)) map.set(dom, []);
     map.get(dom).push(row);
   }
-  return new Map([...map.entries()].sort((a, b) => a[0].localeCompare(b[0])));
+  return map;
 }
 
 // Build a Markdown string. When groupByDomain is true, render grouped
