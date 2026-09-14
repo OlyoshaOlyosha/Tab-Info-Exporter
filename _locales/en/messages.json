@@ -38,5 +38,7 @@
   "sort_urlAsc": { "message": "URL A→Z" },
   "sort_urlDesc": { "message": "URL Z→A" },
   "sort_browserOrder": { "message": "Browser order" },
-  "groupByDomain": { "message": "Group by domain" }
+  "groupByDomain": { "message": "Group by domain" },
+  "preview_empty_fields": { "message": "(select at least one field)" },
+  "preview_empty_tabs": { "message": "(no tabs)" }
 }

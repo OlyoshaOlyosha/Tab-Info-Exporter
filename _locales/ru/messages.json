@@ -38,5 +38,7 @@
   "sort_urlAsc": { "message": "Ссылка А→Я" },
   "sort_urlDesc": { "message": "Ссылка Я→А" },
   "sort_browserOrder": { "message": "Порядок браузера" },
-  "groupByDomain": { "message": "По доменам" }
+  "groupByDomain": { "message": "По доменам" },
+  "preview_empty_fields": { "message": "(выберите хотя бы одно поле)" },
+  "preview_empty_tabs": { "message": "(нет вкладок)" }
 }
