@@ -29,7 +29,7 @@
       * { box-sizing: border-box; }
       body {
         margin: 0;
-        width: 300px;
+        width: 520px;
         font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
         font-size: 13px;
         color: var(--fg);
@@ -45,7 +45,7 @@
         margin-bottom: 10px;
       }
       label { display: block; }
-      select, fieldset, .actions { margin-bottom: 10px; }
+      select, fieldset { margin-bottom: 10px; }
       select {
         width: 100%;
         padding: 6px 8px;
@@ -77,9 +77,35 @@
         gap: 14px;
         padding: 2px 0;
       }
-      .actions {
+      /* Two-column layout */
+      .main {
+        display: grid;
+        grid-template-columns: 62% 38%;
+        gap: 12px;
+      }
+      .preview-col { display: flex; flex-direction: column; }
+      .controls-col { display: flex; flex-direction: column; }
+      #preview {
+        flex: 1;
+        max-height: 70vh;
+        overflow-y: auto;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 8px;
+        background: var(--field-bg);
+        color: var(--fg);
+        font-family: monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        margin-top: 8px;
+      }
+      /* Bottom action bar spanning both columns */
+      .actions-bar {
+        grid-column: 1 / -1;
         display: flex;
         gap: 8px;
+        margin-top: 10px;
       }
       button {
         flex: 1;
@@ -97,9 +123,11 @@
         border-color: var(--accent);
       }
       #status {
+        grid-column: 1 / -1;
         min-height: 16px;
         color: var(--muted);
         word-break: break-word;
+        margin-top: 6px;
       }
     </style>
   </head>
@@ -107,35 +135,57 @@
     <h1>Tab Info Exporter</h1>
     <div id="count"></div>
 
-    <label>
-      <span id="langLabelText"></span>
-      <select id="lang"></select>
-    </label>
-
-    <label>
-      <span id="sortLabelText"></span>
-      <select id="sort"></select>
-    </label>
-
-    <fieldset>
-      <legend id="fieldsLegend"></legend>
-      <div id="fields" class="field-grid"></div>
-    </fieldset>
-
-    <fieldset>
-      <legend id="formatLegend"></legend>
-      <div class="format">
-        <label class="field"><input type="radio" name="format" value="csv" checked /> <span id="fmtCsv"></span></label>
-        <label class="field"><input type="radio" name="format" value="json" /> <span id="fmtJson"></span></label>
+    <div class="main">
+      <!-- LEFT: Preview column -->
+      <div class="preview-col">
+        <fieldset>
+          <legend id="formatLegend"></legend>
+          <div class="format">
+            <label class="field"><input type="radio" name="format" value="csv" checked /> <span id="fmtCsv"></span></label>
+            <label class="field"><input type="radio" name="format" value="json" /> <span id="fmtJson"></span></label>
+            <label class="field"><input type="radio" name="format" value="txt" /> <span id="fmtTxt"></span></label>
+            <label class="field"><input type="radio" name="format" value="md" /> <span id="fmtMd"></span></label>
+          </div>
+        </fieldset>
+        <pre id="preview"></pre>
       </div>
-    </fieldset>
 
-    <div class="actions">
-      <button id="copy" class="primary"></button>
-      <button id="download"></button>
+      <!-- RIGHT: Controls column -->
+      <div class="controls-col">
+        <label>
+          <span id="langLabelText"></span>
+          <select id="lang"></select>
+        </label>
+
+        <label>
+          <span id="sortLabelText"></span>
+          <select id="sort"></select>
+        </label>
+
+        <fieldset>
+          <legend id="fieldsLegend"></legend>
+          <div id="fields" class="field-grid"></div>
+        </fieldset>
+
+        <label class="field">
+          <input type="checkbox" id="groupByDomain" /> <span id="groupByDomainLabel"></span>
+        </label>
+
+        <fieldset>
+          <legend id="viewLegend"></legend>
+          <label class="field"><input type="radio" name="viewMode" value="links" checked /> <span id="viewLinks"></span></label>
+          <label class="field"><input type="radio" name="viewMode" value="titleLink" /> <span id="viewTitleLink"></span></label>
+        </fieldset>
+      </div>
+
+      <!-- BOTTOM: Full-width action bar -->
+      <div class="actions-bar">
+        <button id="copy" class="primary"></button>
+        <button id="download"></button>
+      </div>
+
+      <div id="status"></div>
     </div>
-
-    <div id="status"></div>
 
     <script type="module" src="popup.js"></script>
   </body>

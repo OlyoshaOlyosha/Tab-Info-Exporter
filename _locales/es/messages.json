@@ -5,6 +5,8 @@
   "format_label": {"message": "Formato"},
   "format_csv": {"message": "CSV"},
   "format_json": {"message": "JSON"},
+  "format_txt": {"message": "TXT"},
+  "format_md": {"message": "MD"},
   "copy": {"message": "Copiar"},
   "download": {"message": "Descargar archivo"},
   "lang_label": {"message": "Idioma"},
@@ -35,5 +37,8 @@
   "sort_titleDesc": {"message": "Título Z→A"},
   "sort_urlAsc": {"message": "URL A→Z"},
   "sort_urlDesc": {"message": "URL Z→A"},
-  "sort_browserOrder": {"message": "Orden del navegador"}
+  "sort_browserOrder": {"message": "Orden del navegador"},
+  "groupByDomain": {"message": "Por dominio"},
+  "viewLinks": {"message": "Enlaces"},
+  "viewTitleLink": {"message": "Título+Enlace"}
 }

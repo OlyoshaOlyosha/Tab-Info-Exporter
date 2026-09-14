@@ -5,6 +5,8 @@
   "format_label": { "message": "Формат" },
   "format_csv": { "message": "CSV" },
   "format_json": { "message": "JSON" },
+  "format_txt": { "message": "TXT" },
+  "format_md": { "message": "MD" },
   "copy": { "message": "Копировать" },
   "download": { "message": "Скачать файл" },
   "lang_label": { "message": "Язык" },
@@ -35,5 +37,8 @@
   "sort_titleDesc": { "message": "Название Я→А" },
   "sort_urlAsc": { "message": "Ссылка А→Я" },
   "sort_urlDesc": { "message": "Ссылка Я→А" },
-  "sort_browserOrder": { "message": "Порядок браузера" }
+  "sort_browserOrder": { "message": "Порядок браузера" },
+  "groupByDomain": { "message": "По доменам" },
+  "viewLinks": { "message": "Ссылки" },
+  "viewTitleLink": { "message": "Название+Ссылка" }
 }

@@ -94,3 +94,72 @@ export function sortRows(rows, sortKey) {
   out.sort(cmp[sortKey] || cmp.browserOrder);
   return out;
 }
+
+// Return the domain from a URL: strip leading "www.", return 'Other' for
+// invalid, empty, about: and chrome: URIs.
+export function domainOf(url) {
+  if (!url) return 'Other';
+  try {
+    const u = new URL(url);
+    if (u.protocol === 'about:' || u.protocol === 'chrome:') return 'Other';
+    const hostname = u.hostname;
+    if (!hostname) return 'Other';
+    return hostname.replace(/^www\./, '');
+  } catch {
+    return 'Other';
+  }
+}
+
+// Return a Map<string, Row[]> with domains sorted alphabetically.
+// Insertion order within each domain is preserved (row order).
+export function groupByDomain(rows) {
+  const map = new Map();
+  for (const row of rows) {
+    const dom = domainOf(row.url);
+    if (!map.has(dom)) map.set(dom, []);
+    map.get(dom).push(row);
+  }
+  return new Map([...map.entries()].sort((a, b) => a[0].localeCompare(b[0])));
+}
+
+// Build a Markdown string. When groupByDomain is true, render grouped
+// sections (## domain headers) with bullet rows using viewMode.
+export function buildMarkdown(rows, fields, viewMode, grouped) {
+  if (!rows.length) return '';
+  const renderRow = (row) => {
+    const title = row.title || '';
+    const url = row.url || '';
+    return viewMode === 'links' ? `- [${title}](${url})` : `- ${title} ([${url}](${url}))`;
+  };
+  if (grouped) {
+    const groups = groupByDomain(rows);
+    const parts = [];
+    for (const [domain, domainRows] of groups) {
+      parts.push(`## ${domain}`);
+      for (const row of domainRows) parts.push(renderRow(row));
+    }
+    return parts.join('\n\n');
+  }
+  return rows.map(renderRow).join('\n\n');
+}
+
+// Build a plain-text string. When groupByDomain is true, render grouped
+// sections (=== domain === headers) with lines using viewMode.
+export function buildText(rows, fields, viewMode, grouped) {
+  if (!rows.length) return '';
+  const renderRow = (row) => {
+    const title = row.title || '';
+    const url = row.url || '';
+    return viewMode === 'links' ? `${title} (${url})` : `${title} — ${url}`;
+  };
+  if (grouped) {
+    const groups = groupByDomain(rows);
+    const parts = [];
+    for (const [domain, domainRows] of groups) {
+      parts.push(`=== ${domain} ===`);
+      for (const row of domainRows) parts.push(renderRow(row));
+    }
+    return parts.join('\n\n');
+  }
+  return rows.map(renderRow).join('\n\n');
+}

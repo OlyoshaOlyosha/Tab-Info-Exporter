@@ -7,6 +7,10 @@ import {
   csvCell,
   buildCsv,
   buildJson,
+  domainOf,
+  groupByDomain,
+  buildMarkdown,
+  buildText,
   sortRows,
 } from '../lib.js';
 
@@ -137,4 +141,88 @@ test('formatIso: finite ms -> ISO string, null/undefined -> empty', () => {
 test('FIELD_DEFS / SORT_DEFS are ordered exports', () => {
   assert.equal(FIELD_DEFS[0].key, 'title');
   assert.equal(SORT_DEFS[0].key, 'accessOld');
+});
+
+// --- domainOf tests ---
+test('domainOf returns hostname with www stripped', () => {
+  assert.equal(domainOf('https://www.example.com/page'), 'example.com');
+  assert.equal(domainOf('https://example.com/page'), 'example.com');
+});
+
+test('domainOf returns Other for invalid URLs', () => {
+  assert.equal(domainOf(''), 'Other');
+  assert.equal(domainOf('not-a-url'), 'Other');
+});
+
+test('domainOf returns Other for about: and chrome: URIs', () => {
+  assert.equal(domainOf('about:blank'), 'Other');
+  assert.equal(domainOf('chrome://settings'), 'Other');
+});
+
+// --- groupByDomain tests ---
+test('groupByDomain returns Map with domains sorted alphabetically', () => {
+  const rows = [
+    { id: 1, url: 'https://www.google.com/a' },
+    { id: 2, url: 'https://www.example.com/b' },
+    { id: 3, url: 'https://www.google.com/c' },
+  ];
+  const map = groupByDomain(rows);
+  assert.equal(map.size, 2);
+  const keys = [...map.keys()];
+  assert.deepEqual(keys, ['example.com', 'google.com']);
+  assert.equal(map.get('google.com').length, 2);
+  assert.equal(map.get('example.com').length, 1);
+});
+
+test('groupByDomain returns empty Map for empty rows', () => {
+  const map = groupByDomain([]);
+  assert.equal(map.size, 0);
+});
+
+// --- buildMarkdown tests ---
+test('buildMarkdown returns grouped sections when groupByDomain is true', () => {
+  const rows = [
+    { title: 'A', url: 'https://www.google.com/a' },
+    { title: 'B', url: 'https://www.example.com/b' },
+  ];
+  const md = buildMarkdown(rows, ['title', 'url'], 'links', true);
+  assert.ok(md.includes('## example.com'));
+  assert.ok(md.includes('## google.com'));
+  assert.ok(md.includes('[A](https://www.google.com/a)'));
+  assert.ok(md.includes('[B](https://www.example.com/b)'));
+});
+
+test('buildMarkdown returns flat rows when groupByDomain is false', () => {
+  const rows = [{ title: 'A', url: 'https://example.com' }];
+  const md = buildMarkdown(rows, ['title', 'url'], 'links', false);
+  assert.ok(md.includes('[A](https://example.com)'));
+  assert.ok(!md.includes('##'));
+});
+
+test('buildMarkdown returns empty string for no rows', () => {
+  assert.equal(buildMarkdown([], [], 'links', false), '');
+});
+
+// --- buildText tests ---
+test('buildText returns grouped sections when groupByDomain is true', () => {
+  const rows = [
+    { title: 'A', url: 'https://www.google.com/a' },
+    { title: 'B', url: 'https://www.example.com/b' },
+  ];
+  const txt = buildText(rows, ['title', 'url'], 'links', true);
+  assert.ok(txt.includes('=== example.com ==='));
+  assert.ok(txt.includes('=== google.com ==='));
+  assert.ok(txt.includes('A (https://www.google.com/a)'));
+  assert.ok(txt.includes('B (https://www.example.com/b)'));
+});
+
+test('buildText returns flat lines when groupByDomain is false', () => {
+  const rows = [{ title: 'A', url: 'https://example.com' }];
+  const txt = buildText(rows, ['title', 'url'], 'links', false);
+  assert.ok(txt.includes('A (https://example.com)'));
+  assert.ok(!txt.includes('==='));
+});
+
+test('buildText returns empty string for no rows', () => {
+  assert.equal(buildText([], [], 'links', false), '');
 });

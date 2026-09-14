@@ -7,6 +7,9 @@ import {
   DEFAULT_FIELD_KEYS,
   buildCsv,
   buildJson,
+  buildMarkdown,
+  buildText,
+  domainOf,
   sortRows,
   formatIso,
 } from './lib.js';
@@ -26,22 +29,30 @@ const els = {
   formatLegend: document.getElementById('formatLegend'),
   fmtCsv: document.getElementById('fmtCsv'),
   fmtJson: document.getElementById('fmtJson'),
+  fmtTxt: document.getElementById('fmtTxt'),
+  fmtMd: document.getElementById('fmtMd'),
   copy: document.getElementById('copy'),
   download: document.getElementById('download'),
   lang: document.getElementById('lang'),
   langLabelText: document.getElementById('langLabelText'),
   status: document.getElementById('status'),
+  preview: document.getElementById('preview'),
+  groupByDomain: document.getElementById('groupByDomain'),
+  groupByDomainLabel: document.getElementById('groupByDomainLabel'),
+  viewLinks: document.getElementById('viewLinks'),
+  viewTitleLink: document.getElementById('viewTitleLink'),
+  viewLegend: document.getElementById('viewLegend'),
 };
 
-let tr = (k) => k; // current translator, (re)assigned on language load
+let tr = (k) => k;
 let currentLang = DEFAULT_LANG;
 let rows = [];
 let rowCount = 0;
+let currentFormat = 'csv';
+let currentViewMode = 'links';
 
 const DATE_KEYS = new Set(['openedAt', 'lastAccessedAt']);
 
-// Convert a raw row to its export shape: date fields become ISO 8601 strings
-// (formatIso returns "" for null/missing), all other fields pass through.
 function toExportRow(r) {
   const out = {};
   for (const k in r) out[k] = DATE_KEYS.has(k) ? formatIso(r[k]) : r[k];
@@ -59,7 +70,6 @@ function buildRowFromTab(tab, firstSeen) {
     index: tab.index,
     title: tab.title,
     url: tab.url,
-    // Ceiling: openedAt is first-seen time from background.js; missing -> null.
     openedAt: (tab.id != null && firstSeen[tab.id]) || null,
     lastAccessedAt: tab.lastAccessed ?? null,
     active: tab.active,
@@ -76,20 +86,77 @@ function getSelectedFields() {
   ).map((cb) => cb.value);
 }
 
-function isJson() {
-  return document.querySelector('input[name="format"]:checked').value === 'json';
+function getViewMode() {
+  const checked = document.querySelector('input[name="viewMode"]:checked');
+  return checked ? checked.value : 'links';
 }
 
-// Compute the export payload from current UI state.
-function getPayload() {
+// Compute the output string from current UI state for the given format.
+function buildOutput(format) {
   const fields = getSelectedFields();
   const sorted = sortRows(rows, els.sort.value);
-  const view = sorted.map(toExportRow);
-  return isJson() ? buildJson(view, fields) : buildCsv(view, fields);
+  const viewMode = getViewMode();
+  const groupByDomain = els.groupByDomain.checked;
+
+  if (format === 'csv') {
+    let exportFields = [...fields];
+    let exportRows = sorted.map(toExportRow);
+    if (groupByDomain) {
+      exportRows = exportRows.map((r) => ({ ...r, domain: r.url ? domainOf(r.url) : 'Other' }));
+      if (!exportFields.includes('domain')) exportFields.push('domain');
+    }
+    return buildCsv(exportRows, exportFields);
+  }
+  if (format === 'json') {
+    let exportFields = [...fields];
+    let exportRows = sorted.map(toExportRow);
+    if (groupByDomain) {
+      exportRows = exportRows.map((r) => ({ ...r, domain: r.url ? domainOf(r.url) : 'Other' }));
+      if (!exportFields.includes('domain')) exportFields.push('domain');
+    }
+    return buildJson(exportRows, exportFields);
+  }
+  if (format === 'txt') {
+    return buildText(sorted, fields, viewMode, groupByDomain);
+  }
+  if (format === 'md') {
+    return buildMarkdown(sorted, fields, viewMode, groupByDomain);
+  }
+  return '';
 }
 
-// (Re)build all visible strings and dynamic controls. Safe to call on init and
-// whenever the language changes.
+function renderPreview() {
+  els.preview.textContent = buildOutput(currentFormat);
+}
+
+async function copyToClipboard() {
+  const payload = buildOutput(currentFormat);
+  try {
+    await navigator.clipboard.writeText(payload);
+    setStatus(tr('status_copied'));
+  } catch {
+    setStatus(tr('status_copy_failed'));
+  }
+}
+
+async function downloadFile() {
+  const payload = buildOutput(currentFormat);
+  const type = currentFormat === 'json' ? 'application/json' : 'text/plain';
+  const ext = currentFormat === 'json' ? '.json' : `.${currentFormat}`;
+  const url = URL.createObjectURL(new Blob([payload], { type }));
+  try {
+    const filename = 'tabs_' + new Date().toISOString().slice(0, 10) + ext;
+    await browser.downloads.download({ url, filename, saveAs: false });
+    setStatus(tr('status_saved'));
+  } catch {
+    setStatus(tr('status_save_failed'));
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+// (Re)build all visible strings and dynamic controls. Safe to call on init
+// and whenever the language changes.
 function renderAll() {
   els.count.textContent = tr('count_prefix') + rowCount;
   els.sortLabelText.textContent = tr('sort_label');
@@ -97,9 +164,14 @@ function renderAll() {
   els.formatLegend.textContent = tr('format_label');
   els.fmtCsv.textContent = tr('format_csv');
   els.fmtJson.textContent = tr('format_json');
+  els.fmtTxt.textContent = tr('format_txt');
+  els.fmtMd.textContent = tr('format_md');
   els.copy.textContent = tr('copy');
   els.download.textContent = tr('download');
   els.langLabelText.textContent = tr('lang_label');
+  els.groupByDomainLabel.textContent = tr('groupByDomain');
+  els.viewLinks.textContent = tr('viewLinks');
+  els.viewTitleLink.textContent = tr('viewTitleLink');
 
   // Language options.
   els.lang.replaceChildren();
@@ -111,7 +183,7 @@ function renderAll() {
   }
   els.lang.value = currentLang;
 
-  // Sort options, preserving the user's selection across re-renders.
+  // Sort options.
   const prevSort = els.sort.value;
   els.sort.replaceChildren();
   for (const s of SORT_DEFS) {
@@ -136,10 +208,16 @@ function renderAll() {
   }
 }
 
+function onAnyChange() {
+  renderPreview();
+}
+
 async function applyLang(lang) {
   currentLang = lang;
   const M = await loadMessages(lang);
   tr = (k) => t(M, k);
+  renderAll();
+  onAnyChange();
 }
 
 async function init() {
@@ -154,38 +232,37 @@ async function init() {
   rowCount = rows.length;
 
   renderAll();
+  onAnyChange();
 }
 
+// Event listeners
 els.lang.addEventListener('change', async () => {
   const uiLang = els.lang.value;
   await browser.storage.local.set({ uiLang });
   await applyLang(uiLang);
-  renderAll();
 });
 
-els.copy.addEventListener('click', async () => {
-  try {
-    await navigator.clipboard.writeText(getPayload());
-    setStatus(tr('status_copied'));
-  } catch {
-    setStatus(tr('status_copy_failed'));
-  }
+els.sort.addEventListener('change', onAnyChange);
+els.groupByDomain.addEventListener('change', onAnyChange);
+
+document.querySelectorAll('input[name="format"]').forEach((radio) => {
+  radio.addEventListener('change', (e) => {
+    currentFormat = e.target.value;
+    renderPreview();
+  });
 });
 
-els.download.addEventListener('click', async () => {
-  const payload = getPayload();
-  const type = isJson() ? 'application/json' : 'text/csv';
-  const ext = isJson() ? '.json' : '.csv';
-  const url = URL.createObjectURL(new Blob([payload], { type }));
-  try {
-    const filename = 'tabs_' + new Date().toISOString().slice(0, 10) + ext;
-    await browser.downloads.download({ url, filename, saveAs: false });
-    setStatus(tr('status_saved'));
-  } catch {
-    setStatus(tr('status_save_failed'));
-  } finally {
-    URL.revokeObjectURL(url);
-  }
+document.querySelectorAll('input[name="viewMode"]').forEach((radio) => {
+  radio.addEventListener('change', (e) => {
+    currentViewMode = e.target.value;
+    renderPreview();
+  });
 });
+
+// Field checkbox changes.
+els.fields.addEventListener('change', onAnyChange);
+
+els.copy.addEventListener('click', copyToClipboard);
+els.download.addEventListener('click', downloadFile);
 
 document.addEventListener('DOMContentLoaded', init);
