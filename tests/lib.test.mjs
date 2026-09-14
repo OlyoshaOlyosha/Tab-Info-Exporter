@@ -185,7 +185,7 @@ test('buildMarkdown returns grouped sections when groupByDomain is true', () => 
     { title: 'A', url: 'https://www.google.com/a' },
     { title: 'B', url: 'https://www.example.com/b' },
   ];
-  const md = buildMarkdown(rows, ['title', 'url'], 'links', true);
+  const md = buildMarkdown(rows, ['title', 'url'], true);
   assert.ok(md.includes('## example.com'));
   assert.ok(md.includes('## google.com'));
   assert.ok(md.includes('[A](https://www.google.com/a)'));
@@ -194,13 +194,47 @@ test('buildMarkdown returns grouped sections when groupByDomain is true', () => 
 
 test('buildMarkdown returns flat rows when groupByDomain is false', () => {
   const rows = [{ title: 'A', url: 'https://example.com' }];
-  const md = buildMarkdown(rows, ['title', 'url'], 'links', false);
+  const md = buildMarkdown(rows, ['title', 'url'], false);
   assert.ok(md.includes('[A](https://example.com)'));
   assert.ok(!md.includes('##'));
 });
 
 test('buildMarkdown returns empty string for no rows', () => {
-  assert.equal(buildMarkdown([], [], 'links', false), '');
+  assert.equal(buildMarkdown([], [], false), '');
+});
+
+test('buildMarkdown returns empty string for no fields', () => {
+  assert.equal(buildMarkdown([{ title: 'A' }], [], false), '');
+});
+
+test('buildMarkdown renders all checked fields when all are selected', () => {
+  const rows = [{ title: 'A', url: 'https://ex.com', openedAt: 1000, active: true }];
+  const allFields = ['title', 'url', 'openedAt', 'lastAccessedAt', 'id', 'windowId', 'index', 'active', 'pinned', 'audible', 'discarded', 'favIconUrl'];
+  const md = buildMarkdown(rows, allFields, false);
+  assert.ok(md.includes('[A](https://ex.com)'));
+  assert.ok(md.includes('openedAt:'));
+  assert.ok(md.includes('active:'));
+  assert.ok(md.includes('lastAccessedAt:'));
+  assert.ok(md.includes('id:'));
+  assert.ok(md.includes('windowId:'));
+  assert.ok(md.includes('index:'));
+  assert.ok(md.includes('pinned:'));
+  assert.ok(md.includes('audible:'));
+  assert.ok(md.includes('discarded:'));
+  assert.ok(md.includes('favIconUrl:'));
+});
+
+test('buildMarkdown renders url-only as a bare link', () => {
+  const rows = [{ url: 'https://example.com' }];
+  const md = buildMarkdown(rows, ['url'], false);
+  assert.ok(md.includes('[https://example.com](https://example.com)'));
+});
+
+test('buildMarkdown renders title-only as plain text', () => {
+  const rows = [{ title: 'A' }];
+  const md = buildMarkdown(rows, ['title'], false);
+  assert.ok(md.includes('- A'));
+  assert.ok(!md.includes(']('));
 });
 
 // --- buildText tests ---
@@ -209,7 +243,7 @@ test('buildText returns grouped sections when groupByDomain is true', () => {
     { title: 'A', url: 'https://www.google.com/a' },
     { title: 'B', url: 'https://www.example.com/b' },
   ];
-  const txt = buildText(rows, ['title', 'url'], 'links', true);
+  const txt = buildText(rows, ['title', 'url'], true);
   assert.ok(txt.includes('=== example.com ==='));
   assert.ok(txt.includes('=== google.com ==='));
   assert.ok(txt.includes('A (https://www.google.com/a)'));
@@ -218,11 +252,36 @@ test('buildText returns grouped sections when groupByDomain is true', () => {
 
 test('buildText returns flat lines when groupByDomain is false', () => {
   const rows = [{ title: 'A', url: 'https://example.com' }];
-  const txt = buildText(rows, ['title', 'url'], 'links', false);
+  const txt = buildText(rows, ['title', 'url'], false);
   assert.ok(txt.includes('A (https://example.com)'));
   assert.ok(!txt.includes('==='));
 });
 
 test('buildText returns empty string for no rows', () => {
-  assert.equal(buildText([], [], 'links', false), '');
+  assert.equal(buildText([], [], false), '');
+});
+
+test('buildText returns empty string for no fields', () => {
+  assert.equal(buildText([{ title: 'A' }], [], false), '');
+});
+
+test('buildText renders all checked fields when all are selected', () => {
+  const rows = [{ title: 'A', url: 'https://ex.com', openedAt: 1000, active: true }];
+  const allFields = ['title', 'url', 'openedAt', 'lastAccessedAt', 'id', 'windowId', 'index', 'active', 'pinned', 'audible', 'discarded', 'favIconUrl'];
+  const txt = buildText(rows, allFields, false);
+  assert.ok(txt.includes('A (https://ex.com)'));
+  assert.ok(txt.includes('openedAt:'));
+  assert.ok(txt.includes('active:'));
+});
+
+test('buildText renders url-only as bare url', () => {
+  const rows = [{ url: 'https://example.com' }];
+  const txt = buildText(rows, ['url'], false);
+  assert.ok(txt.includes('https://example.com'));
+});
+
+test('buildText renders title-only as plain text', () => {
+  const rows = [{ title: 'A' }];
+  const txt = buildText(rows, ['title'], false);
+  assert.ok(txt.includes('A'));
 });

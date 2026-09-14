@@ -123,13 +123,28 @@ export function groupByDomain(rows) {
 }
 
 // Build a Markdown string. When groupByDomain is true, render grouped
-// sections (## domain headers) with bullet rows using viewMode.
-export function buildMarkdown(rows, fields, viewMode, grouped) {
-  if (!rows.length) return '';
+// sections (## domain headers). Each row lists every checked field:
+// title+url become a clickable link, url-only becomes a bare link,
+// title-only is plain text, and every other checked field renders as
+// `key: value`.
+export function buildMarkdown(rows, fields, grouped) {
+  if (!rows.length || !fields.length) return '';
+  const hasTitle = fields.includes('title');
+  const hasUrl = fields.includes('url');
+  const otherFields = fields.filter((f) => f !== 'title' && f !== 'url');
   const renderRow = (row) => {
-    const title = row.title || '';
-    const url = row.url || '';
-    return viewMode === 'links' ? `- [${title}](${url})` : `- ${title} ([${url}](${url}))`;
+    const lines = [];
+    if (hasTitle && hasUrl) {
+      lines.push(`- [${row.title || ''}](${row.url || ''})`);
+    } else if (hasUrl) {
+      lines.push(`- [${row.url || ''}](${row.url || ''})`);
+    } else if (hasTitle) {
+      lines.push(`- ${row.title || ''}`);
+    }
+    for (const f of otherFields) {
+      lines.push(`  ${f}: ${row[f] ?? ''}`);
+    }
+    return lines.join('\n');
   };
   if (grouped) {
     const groups = groupByDomain(rows);
@@ -144,13 +159,28 @@ export function buildMarkdown(rows, fields, viewMode, grouped) {
 }
 
 // Build a plain-text string. When groupByDomain is true, render grouped
-// sections (=== domain === headers) with lines using viewMode.
-export function buildText(rows, fields, viewMode, grouped) {
-  if (!rows.length) return '';
+// sections (=== domain === headers). Each row lists every checked field:
+// title+url become `title (url)`, url-only becomes the bare url,
+// title-only is plain text, and every other checked field renders as
+// `key: value`.
+export function buildText(rows, fields, grouped) {
+  if (!rows.length || !fields.length) return '';
+  const hasTitle = fields.includes('title');
+  const hasUrl = fields.includes('url');
+  const otherFields = fields.filter((f) => f !== 'title' && f !== 'url');
   const renderRow = (row) => {
-    const title = row.title || '';
-    const url = row.url || '';
-    return viewMode === 'links' ? `${title} (${url})` : `${title} — ${url}`;
+    const lines = [];
+    if (hasTitle && hasUrl) {
+      lines.push(`${row.title || ''} (${row.url || ''})`);
+    } else if (hasUrl) {
+      lines.push(`${row.url || ''}`);
+    } else if (hasTitle) {
+      lines.push(`${row.title || ''}`);
+    }
+    for (const f of otherFields) {
+      lines.push(`${f}: ${row[f] ?? ''}`);
+    }
+    return lines.join('\n');
   };
   if (grouped) {
     const groups = groupByDomain(rows);

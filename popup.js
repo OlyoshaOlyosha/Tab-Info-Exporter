@@ -39,9 +39,6 @@ const els = {
   preview: document.getElementById('preview'),
   groupByDomain: document.getElementById('groupByDomain'),
   groupByDomainLabel: document.getElementById('groupByDomainLabel'),
-  viewLinks: document.getElementById('viewLinks'),
-  viewTitleLink: document.getElementById('viewTitleLink'),
-  viewLegend: document.getElementById('viewLegend'),
 };
 
 let tr = (k) => k;
@@ -49,7 +46,6 @@ let currentLang = DEFAULT_LANG;
 let rows = [];
 let rowCount = 0;
 let currentFormat = 'csv';
-let currentViewMode = 'links';
 
 const DATE_KEYS = new Set(['openedAt', 'lastAccessedAt']);
 
@@ -86,16 +82,9 @@ function getSelectedFields() {
   ).map((cb) => cb.value);
 }
 
-function getViewMode() {
-  const checked = document.querySelector('input[name="viewMode"]:checked');
-  return checked ? checked.value : 'links';
-}
-
-// Compute the output string from current UI state for the given format.
 function buildOutput(format) {
   const fields = getSelectedFields();
   const sorted = sortRows(rows, els.sort.value);
-  const viewMode = getViewMode();
   const groupByDomain = els.groupByDomain.checked;
 
   if (format === 'csv') {
@@ -117,10 +106,10 @@ function buildOutput(format) {
     return buildJson(exportRows, exportFields);
   }
   if (format === 'txt') {
-    return buildText(sorted, fields, viewMode, groupByDomain);
+    return buildText(sorted, fields, groupByDomain);
   }
   if (format === 'md') {
-    return buildMarkdown(sorted, fields, viewMode, groupByDomain);
+    return buildMarkdown(sorted, fields, groupByDomain);
   }
   return '';
 }
@@ -170,8 +159,6 @@ function renderAll() {
   els.download.textContent = tr('download');
   els.langLabelText.textContent = tr('lang_label');
   els.groupByDomainLabel.textContent = tr('groupByDomain');
-  els.viewLinks.textContent = tr('viewLinks');
-  els.viewTitleLink.textContent = tr('viewTitleLink');
 
   // Language options.
   els.lang.replaceChildren();
@@ -248,13 +235,6 @@ els.groupByDomain.addEventListener('change', onAnyChange);
 document.querySelectorAll('input[name="format"]').forEach((radio) => {
   radio.addEventListener('change', (e) => {
     currentFormat = e.target.value;
-    renderPreview();
-  });
-});
-
-document.querySelectorAll('input[name="viewMode"]').forEach((radio) => {
-  radio.addEventListener('change', (e) => {
-    currentViewMode = e.target.value;
     renderPreview();
   });
 });

@@ -38,7 +38,5 @@
   "sort_urlAsc": { "message": "URL A→Z" },
   "sort_urlDesc": { "message": "URL Z→A" },
   "sort_browserOrder": { "message": "Browser order" },
-  "groupByDomain": { "message": "Group by domain" },
-  "viewLinks": { "message": "Links" },
-  "viewTitleLink": { "message": "Title+Link" }
+  "groupByDomain": { "message": "Group by domain" }
 }

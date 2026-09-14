@@ -38,7 +38,5 @@
   "sort_urlAsc": { "message": "Ссылка А→Я" },
   "sort_urlDesc": { "message": "Ссылка Я→А" },
   "sort_browserOrder": { "message": "Порядок браузера" },
-  "groupByDomain": { "message": "По доменам" },
-  "viewLinks": { "message": "Ссылки" },
-  "viewTitleLink": { "message": "Название+Ссылка" }
+  "groupByDomain": { "message": "По доменам" }
 }
