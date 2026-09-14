@@ -1,18 +1,21 @@
 # Tab Info Exporter
 
-A read-only Firefox extension that exports the metadata of all open tabs to CSV or
-JSON, either copied to the clipboard or saved as a file. It never modifies, moves,
-or closes tabs.
+A read-only Firefox extension that exports the metadata of all open tabs to
+CSV, JSON, plain text, or Markdown — either copied to the clipboard or saved as
+a file. It never modifies, moves, or closes tabs.
 
 ## Features
 
 - Export metadata for **all open tabs** across all windows in one action.
-- Output to **CSV** or **JSON**.
+- Output formats: **CSV**, **JSON**, **TXT**, and **Markdown**.
 - Send the result to the **clipboard** or **download** it as a file.
 - **Sortable** with 9 modes (by access time, open time, title, URL, or browser order).
 - **Selectable fields** — choose exactly which columns to include.
+- **Group by domain** for TXT and Markdown (optional count in domain headers).
 - **Per-tab "date opened"** tracked locally by the extension (see Known limitation).
-- **Runtime UI language switch** between English and Russian; the choice persists.
+- **Runtime UI language** switch: English, Russian, Spanish; the choice persists.
+- UI preferences (format, sort, fields, grouping, domain counts, language) are
+  remembered between popup opens.
 
 ## Requirements
 
@@ -40,30 +43,34 @@ A temporary add-on is removed when Firefox restarts.
 
 The popup has the following controls:
 
-- **Tab count** — shows how many tabs are included in the export.
-- **Language** selector — English by default; switch to Russian to change all
-  UI text at runtime. The selection is saved in `storage.local` and restored on
-  the next open.
-- **Sort** dropdown — one of 9 orderings (see Sort options).
-- **Fields** checkboxes — 4 are on by default: **Title**, **URL**, **Date
-  opened**, **Date last accessed**; the rest are optional.
-- **Format** radio — **CSV** (default) or **JSON**.
-- **Copy** button — writes the result to the clipboard.
-- **Download file** button — saves the result as `tabs_YYYY-MM-DD.csv` or
-  `tabs_YYYY-MM-DD.json`.
+- **Tab count** — how many tabs are included in the export.
+- **Language** — English, Russian, or Spanish. Saved and restored on the next open.
+- **Sort** — one of 9 orderings (see Sort options).
+- **Fields** — 4 on by default: **Title**, **URL**, **Date opened**, **Date last
+  accessed**; the rest are optional.
+- **Format** — **CSV** (default), **JSON**, **TXT**, or **MD**.
+- **Group by domain** — groups TXT/Markdown output under domain headers. Domain
+  order follows the current sort (by the first tab of each domain in the sorted
+  list).
+- **Show count in domain headers** — visible only when format is TXT or MD and
+  grouping is on. Headers become e.g. `## github.com (12)` or
+  `=== github.com (12) ===`.
+- **Copy** — writes the export to the clipboard.
+- **Download file** — saves as `tabs_YYYY-MM-DD.csv`, `.json`, `.txt`, or `.md`.
 
-A status line at the bottom reports success or failure for each action
-(e.g. "Copied", "File saved", or an error message).
+A status line at the bottom reports success or failure (e.g. "Copied", "File
+saved", or an error message).
 
-Dates are formatted as ISO 8601 (`YYYY-MM-DDTHH:mm:ss.sssZ`); missing values
-become empty cells (CSV) or `null` (JSON). CSV output follows RFC 4180
-quoting (every field is quoted; embedded quotes are doubled) and uses CRLF line
-endings.
+In **Markdown** preview, links activate the existing tab when possible (focus
+that tab and its window) instead of always opening a new one.
+
+Dates are ISO 8601 (`YYYY-MM-DDTHH:mm:ss.sssZ`); missing values become empty
+cells (CSV), `null` (JSON), or empty text (TXT/MD). CSV follows RFC 4180
+(every field quoted; embedded quotes doubled) with CRLF line endings.
 
 ## Exported fields
 
-All 12 fields are listed below. Those marked **Default** are enabled in the
-popup on first open.
+All 12 fields are listed below. Those marked **Default** are enabled on first open.
 
 | Field              | Default |
 | ------------------ | ------- |
@@ -82,11 +89,9 @@ popup on first open.
 
 ## Sort options
 
-The Sort dropdown offers 9 modes:
-
 | Mode                          |
 | ----------------------------- |
-| Last accessed: oldest first  |
+| Last accessed: oldest first   |
 | Last accessed: newest first   |
 | Date opened: oldest first     |
 | Date opened: newest first     |
@@ -96,57 +101,53 @@ The Sort dropdown offers 9 modes:
 | URL Z→A                       |
 | Browser order                 |
 
-For the date-based sorts, tabs without a known date always sink to the bottom
-regardless of direction. "Browser order" sorts by window, then by the tab's
-position within the window — this is also the initial selection.
+For date-based sorts, tabs without a known date always sink to the bottom
+regardless of direction. "Browser order" sorts by window, then by position
+within the window — this is the default selection.
 
 ## Data & privacy
 
-Everything runs locally in your browser. The extension makes **no network calls**
-and **collects no data**. Only four permissions are requested, each used
-minimally:
+Everything runs locally. The extension makes **no network calls** and
+**collects no data**. Permissions:
 
-- **`tabs`** — read tab metadata (title, URL, dates, flags). No access to page
-  content, and no host permissions are requested.
-- **`storage`** — remember the per-tab "date opened" map and the chosen UI
-  language between sessions.
-- **`downloads`** — save the exported file when you click Download.
-- **`clipboardWrite`** — write the exported text when you click Copy.
+- **`tabs`** — read tab metadata (title, URL, dates, flags). No page content,
+  no host permissions.
+- **`storage`** — per-tab "date opened" map and UI settings (language, format,
+  sort, fields, grouping, domain counts).
+- **`downloads`** — save the file when you click Download.
+- **`clipboardWrite`** — write text when you click Copy.
 
 ## Known limitation
 
-The **Date opened** value is the first time the extension *saw* the tab
-(tracked by `background.js` since install or the last browser restart), not the
-tab's real creation time. Reasons:
+**Date opened** is the first time the extension *saw* the tab (since install or
+last browser restart), not the real creation time:
 
-- Firefox's `tabs.Tab` API exposes no tab-creation timestamp (only
-  `lastAccessed`).
-- The background script records `openedAt` as first-seen time per tab id, kept
-  in `storage.local`.
-- Session-restored tabs receive the restart moment, because they were unknown
-  to the extension before that.
+- Firefox's `tabs.Tab` API exposes no creation timestamp (only `lastAccessed`).
+- `background.js` records first-seen time per tab id in `storage.local`.
+- Session-restored tabs get the restart moment.
 
-This matches the approach used by comparable extensions; the extension does not
-invent a creation date.
+This matches comparable extensions; the extension does not invent a creation date.
 
 ## Icons
-
-The extension reads these three icon files:
 
 - `icons/icon-48.png`
 - `icons/icon-96.png`
 - `icons/icon-128.png`
 
-These icon files are committed in this repository. Replace them with your own artwork (same filenames and sizes) to customize the toolbar and extension icon.
+Replace them with your own artwork (same filenames and sizes) to customize the
+toolbar and extension icon.
 
 ## Localization (for contributors)
 
-UI strings live in `_locales/<code>/messages.json`. To add a new language:
+UI strings live in `_locales/<code>/messages.json`. To add a language:
 
-1. Create `_locales/<code>/messages.json` by translating every `message` value from `_locales/en/messages.json`, keeping all keys identical.
-2. Add the code to `SUPPORTED_LANGS` in `i18n.js` so it appears in the Language selector.
+1. Create `_locales/<code>/messages.json` by translating every `message` value
+   from `_locales/en/messages.json`, keeping all keys identical.
+2. Add the code to `SUPPORTED_LANGS` in `i18n.js` so it appears in the Language
+   selector.
 
-English is the default and the fallback: if a locale file is missing or malformed, the UI falls back to English, and any missing key renders as its key rather than breaking the layout.
+English is the default and fallback: missing or malformed locale files fall back
+to English; missing keys render as the key itself.
 
 ## License
 
@@ -154,11 +155,8 @@ Released under the MIT License. See the [LICENSE](LICENSE) file.
 
 ## Source & feedback
 
-The source code lives on GitHub. To report a bug or suggest a feature, open an
-issue there:
-
 - Issues: https://github.com/OlyoshaOlyosha/Tab-Info-Exporter/issues
 - Repository: https://github.com/OlyoshaOlyosha/Tab-Info-Exporter
 
-The published add-on is listed on Mozilla Add-ons (AMO):
+Published on Mozilla Add-ons (AMO):
 https://addons.mozilla.org/addon/tab-info-exporter/
