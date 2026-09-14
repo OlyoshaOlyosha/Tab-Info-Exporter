@@ -2,7 +2,7 @@
 // used only in the popup context (not imported by node --test).
 
 export const DEFAULT_LANG = 'en';
-export const SUPPORTED_LANGS = ['en', 'ru'];
+export const SUPPORTED_LANGS = ['en', 'ru', 'es'];
 
 // Load a locale's messages. Falls back to English on any failure so the UI
 // never breaks if a locale file is missing or malformed.

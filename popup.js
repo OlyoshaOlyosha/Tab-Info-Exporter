@@ -106,7 +106,7 @@ function renderAll() {
   for (const lang of SUPPORTED_LANGS) {
     const opt = document.createElement('option');
     opt.value = lang;
-    opt.textContent = tr(lang === 'en' ? 'lang_en' : 'lang_ru');
+    opt.textContent = tr('lang_' + lang) + ' (' + lang + ')';
     els.lang.appendChild(opt);
   }
   els.lang.value = currentLang;

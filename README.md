@@ -141,17 +141,12 @@ These icon files are committed in this repository. Replace them with your own ar
 
 ## Localization (for contributors)
 
-UI strings live in `_locales/<code>/messages.json`. To add a language:
+UI strings live in `_locales/<code>/messages.json`. To add a new language:
 
-1. Copy `_locales/en/messages.json` to `_locales/<code>/messages.json` (where
-   `<code>` is the locale code, e.g. `de`) and translate every `message` value,
-   keeping all keys identical to the English file.
-2. Add the code to `SUPPORTED_LANGS` in `i18n.js` so it appears in the Language
-   selector.
+1. Create `_locales/<code>/messages.json` by translating every `message` value from `_locales/en/messages.json`, keeping all keys identical.
+2. Add the code to `SUPPORTED_LANGS` in `i18n.js` so it appears in the Language selector.
 
-English is the default and the fallback: if a locale file is missing or
-malformed, the UI falls back to English, and any missing key renders as its key
-rather than breaking the layout.
+English is the default and the fallback: if a locale file is missing or malformed, the UI falls back to English, and any missing key renders as its key rather than breaking the layout.
 
 ## License
 

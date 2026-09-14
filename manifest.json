@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tab Info Exporter",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "default_locale": "en",
   "description": "Export metadata of all open tabs (title, URL, dates) to CSV or JSON via clipboard or file download.",
   "action": {

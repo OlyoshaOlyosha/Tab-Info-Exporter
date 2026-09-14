@@ -9,6 +9,7 @@
   "download": { "message": "Download file" },
   "lang_label": { "message": "Language" },
   "lang_en": { "message": "English" },
+  "lang_es": { "message": "Español" },
   "lang_ru": { "message": "Русский" },
   "status_copied": { "message": "Copied ✓" },
   "status_copy_failed": { "message": "❌ Failed to copy" },
