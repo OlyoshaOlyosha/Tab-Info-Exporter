@@ -231,6 +231,44 @@ function renderJsonToPreview(json) {
   els.preview.appendChild(frag);
 }
 
+// Render CSV with the header row tinted in the link color and the quote
+// characters dimmed. lib.js always quotes every cell, so a regex matching
+// either a quoted run or a comma is sufficient — no partial-CSV parser needed.
+function renderCsvToPreview(csv) {
+  els.preview.replaceChildren();
+  const frag = document.createDocumentFragment();
+  const lines = csv.split('\r\n');
+  const re = /"(?:[^"]|"")*"|,/g;
+  lines.forEach((line, i) => {
+    if (i > 0) frag.append('\n');
+    if (!line) return;
+    const isHeader = i === 0;
+    let last = 0;
+    let m;
+    while ((m = re.exec(line)) !== null) {
+      if (m.index > last) frag.append(line.slice(last, m.index));
+      const tok = m[0];
+      if (tok === ',') {
+        frag.append(',');
+      } else {
+        const q1 = document.createElement('span');
+        q1.className = 'csv-q';
+        q1.textContent = '"';
+        const body = document.createElement('span');
+        body.className = isHeader ? 'csv-header' : 'csv-cell';
+        body.textContent = tok.slice(1, -1);
+        const q2 = document.createElement('span');
+        q2.className = 'csv-q';
+        q2.textContent = '"';
+        frag.append(q1, body, q2);
+      }
+      last = m.index + tok.length;
+    }
+    if (last < line.length) frag.append(line.slice(last));
+  });
+  els.preview.appendChild(frag);
+}
+
 function renderPreview() {
   const output = buildOutput(currentFormat);
   if (currentFormat === 'md') {
@@ -247,6 +285,13 @@ function renderPreview() {
       return;
     }
     renderJsonToPreview(output);
+  } else if (currentFormat === 'csv') {
+    els.preview.classList.add('plain');
+    if (!output) {
+      els.preview.textContent = tr('preview_empty_tabs');
+      return;
+    }
+    renderCsvToPreview(output);
   } else {
     els.preview.classList.add('plain');
     els.preview.textContent = output || tr('preview_empty_tabs');
