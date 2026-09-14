@@ -237,6 +237,24 @@ test('buildMarkdown renders title-only as plain text', () => {
   assert.ok(!md.includes(']('));
 });
 
+test('buildMarkdown renders favIconUrl field with a clean URL when favIconUrl is checked', () => {
+  const rows = [{ title: 'A', url: 'https://ex.com', favIconUrl: 'https://ex.com/fav.ico' }];
+  const md = buildMarkdown(rows, ['title', 'url', 'favIconUrl'], false);
+  assert.ok(md.includes('favIconUrl: https://ex.com/fav.ico'));
+});
+
+test('buildMarkdown renders favIconUrl as empty when field is checked but favIconUrl is absent', () => {
+  const rows = [{ title: 'A', url: 'https://ex.com' }];
+  const md = buildMarkdown(rows, ['title', 'url', 'favIconUrl'], false);
+  assert.ok(md.includes('favIconUrl: '));
+});
+
+test('buildText renders favIconUrl field when favIconUrl is checked', () => {
+  const rows = [{ title: 'A', url: 'https://ex.com', favIconUrl: 'https://ex.com/fav.ico' }];
+  const txt = buildText(rows, ['title', 'url', 'favIconUrl'], false);
+  assert.ok(txt.includes('favIconUrl: https://ex.com/fav.ico'));
+});
+
 // --- buildText tests ---
 test('buildText returns grouped sections when groupByDomain is true', () => {
   const rows = [
