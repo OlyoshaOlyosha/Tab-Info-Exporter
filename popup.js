@@ -46,7 +46,7 @@ const els = {
 
 const SETTINGS_KEY = 'uiSettings';
 const DEFAULT_SETTINGS = {
-  format: 'csv',
+  format: 'md',
   sort: 'accessOld',
   fields: DEFAULT_FIELD_KEYS.slice(),
   groupByDomain: false,
@@ -208,6 +208,29 @@ function renderMarkdownToPreview(md) {
   }
 }
 
+// Render JSON with the object keys tinted in the accent color. Values are
+// appended as text nodes (never HTML), so untrusted tab titles cannot inject
+// markup. Only the fixed field names appear as keys, so a line-based regex is
+// sufficient — no need to re-parse the JSON.
+function renderJsonToPreview(json) {
+  els.preview.replaceChildren();
+  const frag = document.createDocumentFragment();
+  const lines = json.split('\n');
+  lines.forEach((line, i) => {
+    if (i > 0) frag.append('\n');
+    const m = line.match(/^(\s*)"((?:[^"\\]|\\.)*)":(.*)$/);
+    if (m) {
+      const key = document.createElement('span');
+      key.className = 'json-key';
+      key.textContent = '"' + m[2] + '"';
+      frag.append(m[1], key, ':', m[3]);
+    } else {
+      frag.append(line);
+    }
+  });
+  els.preview.appendChild(frag);
+}
+
 function renderPreview() {
   const output = buildOutput(currentFormat);
   if (currentFormat === 'md') {
@@ -217,6 +240,13 @@ function renderPreview() {
       return;
     }
     renderMarkdownToPreview(output);
+  } else if (currentFormat === 'json') {
+    els.preview.classList.add('plain');
+    if (!output) {
+      els.preview.textContent = tr('preview_empty_tabs');
+      return;
+    }
+    renderJsonToPreview(output);
   } else {
     els.preview.classList.add('plain');
     els.preview.textContent = output || tr('preview_empty_tabs');

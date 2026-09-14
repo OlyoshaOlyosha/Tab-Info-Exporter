@@ -4,16 +4,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Tab Info Exporter</title>
-        <style>
+    <style>
       :root {
-        --bg: #ffffff;
-        --fg: #1c1c1c;
-        --muted: #6b6b6b;
-        --border: #d8d8d8;
+        --bg: #f4f5f7;
+        --fg: #1c1c1e;
+        --muted: #6b6b70;
+        --border: #d8d8dc;
         --accent: #0a84ff;
         --accent-fg: #ffffff;
-        --field-bg: #f5f5f5;
-        --radius: 8px;
+        --field-bg: #ffffff;
+        --track: #e8e8ed;
+        --radius: 10px;
+        --radius-sm: 8px;
         --space-1: 4px;
         --space-2: 8px;
         --space-3: 12px;
@@ -22,17 +24,20 @@
         --font-size: 13px;
         --font-mono: 12px;
         --popup-w: 700px;
-        --popup-h: 550px;
+        --popup-h: 580px;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
       }
       @media (prefers-color-scheme: dark) {
         :root {
-          --bg: #1e1e1e;
-          --fg: #f2f2f2;
-          --muted: #a0a0a0;
-          --border: #3a3a3a;
+          --bg: #0a0a0c;
+          --fg: #f2f2f7;
+          --muted: #8e8e93;
+          --border: #2a2a2c;
           --accent: #0a84ff;
           --accent-fg: #ffffff;
-          --field-bg: #2a2a2a;
+          --field-bg: #141416;
+          --track: #1c1c1e;
+          --shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
         }
       }
       * { box-sizing: border-box; }
@@ -53,42 +58,77 @@
         display: flex;
         flex-direction: column;
       }
-      h1 {
-        font-size: 14px;
-        font-weight: 600;
-        margin: 0 0 var(--space-1);
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: var(--space-2);
         flex-shrink: 0;
+      }
+      .header-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        flex-shrink: 0;
+        display: block;
+      }
+      .header-text {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+      }
+      h1 {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -0.03em;
+        line-height: 1.2;
       }
       #count {
         color: var(--muted);
-        margin-bottom: var(--space-2);
-        flex-shrink: 0;
+        margin: 0;
         font-size: 12px;
+        line-height: 1.3;
       }
       label { display: block; }
-      select, fieldset { margin-bottom: var(--space-2); }
       select {
         width: 100%;
-        padding: 6px 8px;
+        padding: 7px 10px;
         border: 1px solid var(--border);
-        border-radius: var(--radius);
+        border-radius: var(--radius-sm);
         background: var(--field-bg);
         color: var(--fg);
         font: inherit;
+        margin-bottom: var(--space-2);
       }
       select:focus-visible {
         outline: 2px solid var(--accent);
         outline-offset: 1px;
       }
+      .section-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 6px;
+      }
       fieldset {
         border: 1px solid var(--border);
         border-radius: var(--radius);
         padding: var(--space-2) var(--space-3);
+        background: var(--field-bg);
+        margin-bottom: var(--space-2);
+        box-shadow: var(--shadow);
       }
       legend {
         padding: 0 var(--space-1);
         color: var(--muted);
-        font-size: 11px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
       .field-grid {
         display: grid;
@@ -98,14 +138,97 @@
       .field {
         display: flex;
         align-items: center;
-        gap: 6px;
-        padding: 2px 0;
+        gap: 8px;
+        padding: 5px 4px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.15s ease;
       }
-      .format {
+      .field:hover {
+        background: color-mix(in srgb, var(--fg) 5%, transparent);
+      }
+      .field input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        margin: 0;
+        border: 1.5px solid var(--border);
+        border-radius: 4px;
+        background: var(--field-bg);
+        cursor: pointer;
+        position: relative;
+        transition: background 0.15s ease, border-color 0.15s ease;
+      }
+      .field input[type="checkbox"]:hover {
+        border-color: var(--muted);
+      }
+      .field input[type="checkbox"]:checked {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      .field input[type="checkbox"]:checked::after {
+        content: '';
+        position: absolute;
+        left: 4px;
+        top: 1px;
+        width: 5px;
+        height: 9px;
+        border: solid var(--accent-fg);
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+      .field input[type="checkbox"]:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .format-block {
+        margin-bottom: var(--space-2);
+        flex-shrink: 0;
+      }
+      .segmented {
         display: flex;
-        gap: 14px;
-        padding: 2px 0;
-        flex-wrap: wrap;
+        background: var(--track);
+        border-radius: var(--radius);
+        padding: 3px;
+        gap: 2px;
+      }
+      .segment {
+        flex: 1;
+        position: relative;
+        margin: 0;
+        cursor: pointer;
+      }
+      .segment input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+        margin: 0;
+      }
+      .segment span {
+        display: block;
+        text-align: center;
+        padding: 7px 4px;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+        user-select: none;
+      }
+      .segment:hover span {
+        color: var(--fg);
+      }
+      .segment input:checked + span {
+        background: var(--accent);
+        color: var(--accent-fg);
+        box-shadow: 0 1px 3px rgba(10, 132, 255, 0.35);
+      }
+      .segment input:focus-visible + span {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
       }
       .app {
         display: grid;
@@ -128,23 +251,35 @@
         min-height: 0;
         overflow-y: auto;
       }
+      .controls-col > label > span:first-child {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 4px;
+      }
       #preview {
         flex: 1;
         min-height: 0;
         overflow-y: auto;
         border: 1px solid var(--border);
         border-radius: var(--radius);
-        padding: var(--space-2);
+        padding: var(--space-2) var(--space-3);
         background: var(--field-bg);
         color: var(--fg);
         font-size: var(--font-size);
         word-break: break-word;
-        margin-top: var(--space-2);
+        box-shadow: var(--shadow);
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
       }
       #preview.plain {
-        font-family: monospace;
+        font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
         font-size: var(--font-mono);
         white-space: pre-wrap;
+        line-height: 1.5;
       }
       #preview::-webkit-scrollbar {
         width: 6px;
@@ -159,12 +294,23 @@
       #preview::-webkit-scrollbar-thumb:hover {
         background: var(--muted);
       }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
       #preview .md-item {
-        padding: 6px 0;
+        padding: 8px 6px;
+        margin: 0 -6px;
         border-bottom: 1px solid var(--border);
+        border-radius: 8px;
+        animation: fadeIn 0.3s ease both;
+        transition: background 0.18s ease;
       }
       #preview .md-item:last-child {
         border-bottom: none;
+      }
+      #preview .md-item:hover {
+        background: color-mix(in srgb, var(--fg) 6%, transparent);
       }
       #preview .md-item a,
       #preview .md-title {
@@ -181,12 +327,15 @@
         color: var(--fg);
       }
       #preview h2 {
-        font-size: 13px;
-        font-weight: 600;
+        font-size: 12px;
+        font-weight: 700;
         margin: 14px 0 6px;
         color: var(--fg);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
         border-bottom: 1px solid var(--border);
-        padding-bottom: 3px;
+        padding-bottom: 4px;
+        animation: fadeIn 0.3s ease both;
       }
       #preview h2:first-child {
         margin-top: 0;
@@ -199,6 +348,9 @@
         align-items: center;
         gap: 4px;
       }
+      #preview .json-key {
+        color: var(--accent);
+      }
       .actions-bar {
         grid-column: 1 / -1;
         display: flex;
@@ -208,16 +360,21 @@
       button {
         flex: 1;
         min-height: var(--btn-h);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
+        border: 1px solid color-mix(in srgb, var(--border) 50%, var(--muted));
+        border-radius: var(--radius-sm);
         background: var(--field-bg);
         color: var(--fg);
         font: inherit;
+        font-weight: 600;
         cursor: pointer;
-        transition: background 0.15s, border-color 0.15s;
+        transition: background 0.15s, border-color 0.15s, transform 0.1s;
+        box-shadow: var(--shadow);
       }
       button:hover {
-        background: color-mix(in srgb, var(--field-bg) 80%, var(--fg));
+        background: color-mix(in srgb, var(--field-bg) 88%, var(--fg));
+      }
+      button:active {
+        transform: scale(0.98);
       }
       button:focus-visible {
         outline: 2px solid var(--accent);
@@ -229,37 +386,58 @@
         border-color: var(--accent);
       }
       button.primary:hover {
-        background: color-mix(in srgb, var(--accent) 85%, black);
+        background: color-mix(in srgb, var(--accent) 88%, black);
+        box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 35%, transparent);
       }
-      #status {
+            #status {
         grid-column: 1 / -1;
-        min-height: 16px;
+        min-height: 0;
         color: var(--muted);
         word-break: break-word;
+        margin-top: 0;
+        font-size: 12px;
+        line-height: 1.3;
+      }
+      #status:not(:empty) {
         margin-top: var(--space-1);
+        min-height: 16px;
       }
-      input[type="checkbox"],
-      input[type="radio"] {
-        accent-color: var(--accent);
-      }
+
     </style>
   </head>
   <body>
-    <h1>Tab Info Exporter</h1>
-    <div id="count"></div>
+    <header class="header">
+      <img class="header-icon" src="icons/icon-48.png" width="24" height="24" alt="" />
+      <div class="header-text">
+        <h1>Tab Info Exporter</h1>
+        <div id="count"></div>
+      </div>
+    </header>
 
      <div class="app">
       <!-- LEFT: Preview column -->
       <div class="preview-col">
-        <fieldset>
-          <legend id="formatLegend"></legend>
-          <div class="format">
-             <label class="field"><input type="radio" name="format" value="txt" /> <span id="fmtTxt"></span></label>
-             <label class="field"><input type="radio" name="format" value="md" /> <span id="fmtMd"></span></label>
-             <label class="field"><input type="radio" name="format" value="csv" checked /> <span id="fmtCsv"></span></label>
-             <label class="field"><input type="radio" name="format" value="json" /> <span id="fmtJson"></span></label>
+        <div class="format-block">
+          <div class="section-label" id="formatLegend"></div>
+          <div class="segmented" role="radiogroup">
+            <label class="segment">
+              <input type="radio" name="format" value="md" checked />
+              <span id="fmtMd"></span>
+            </label>
+            <label class="segment">
+              <input type="radio" name="format" value="txt" />
+              <span id="fmtTxt"></span>
+            </label>
+            <label class="segment">
+              <input type="radio" name="format" value="json" />
+              <span id="fmtJson"></span>
+            </label>
+            <label class="segment">
+              <input type="radio" name="format" value="csv" />
+              <span id="fmtCsv"></span>
+            </label>
           </div>
-        </fieldset>
+        </div>
         <div id="preview"></div>
       </div>
 
@@ -280,13 +458,16 @@
           <div id="fields" class="field-grid"></div>
         </fieldset>
 
-        <label class="field">
-           <input type="checkbox" id="groupByDomain" /> <span id="groupByDomainLabel"></span>
-         </label>
-        <label class="field" id="showDomainCountsWrap" hidden>
-          <input type="checkbox" id="showDomainCounts" />
-          <span id="showDomainCountsLabel"></span>
-        </label>
+        <fieldset>
+          <label class="field">
+            <input type="checkbox" id="groupByDomain" />
+            <span id="groupByDomainLabel"></span>
+          </label>
+          <label class="field" id="showDomainCountsWrap" hidden>
+            <input type="checkbox" id="showDomainCounts" />
+            <span id="showDomainCountsLabel"></span>
+          </label>
+        </fieldset>
        </div>
 
       <!-- BOTTOM: Full-width action bar -->
