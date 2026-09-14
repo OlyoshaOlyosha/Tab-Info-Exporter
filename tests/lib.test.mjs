@@ -160,19 +160,19 @@ test('domainOf returns Other for about: and chrome: URIs', () => {
 });
 
 // --- groupByDomain tests ---
-test('groupByDomain returns Map with domains sorted alphabetically', () => {
-  const rows = [
-    { id: 1, url: 'https://www.google.com/a' },
-    { id: 2, url: 'https://www.example.com/b' },
-    { id: 3, url: 'https://www.google.com/c' },
-  ];
-  const map = groupByDomain(rows);
-  assert.equal(map.size, 2);
-  const keys = [...map.keys()];
-  assert.deepEqual(keys, ['example.com', 'google.com']);
-  assert.equal(map.get('google.com').length, 2);
-  assert.equal(map.get('example.com').length, 1);
-});
+test('groupByDomain returns Map preserving insertion order of domains', () => {
+   const rows = [
+     { id: 1, url: 'https://www.google.com/a' },
+     { id: 2, url: 'https://www.example.com/b' },
+     { id: 3, url: 'https://www.google.com/c' },
+   ];
+   const map = groupByDomain(rows);
+   assert.equal(map.size, 2);
+   const keys = [...map.keys()];
+   assert.deepEqual(keys, ['google.com', 'example.com']);
+   assert.equal(map.get('google.com').length, 2);
+   assert.equal(map.get('example.com').length, 1);
+ });
 
 test('groupByDomain returns empty Map for empty rows', () => {
   const map = groupByDomain([]);
