@@ -357,3 +357,138 @@ test('buildRowFromTab returns null openedAt when tab id not in firstSeen', () =>
   assert.equal(row.openedAt, null);
   assert.equal(row.lastAccessedAt, null);
 });
+
+// --- buildRowFromTab additions ---
+test('buildRowFromTab preserves pre-set favIconUrl', () => {
+  const tab = { id: 1, title: 'T', url: 'https://ex.com', windowId: 1, index: 0, active: false, pinned: false, audible: false, discarded: false, lastAccessed: null, favIconUrl: 'https://ex.com/fav.ico' };
+  const row = buildRowFromTab(tab, {});
+  assert.equal(row.favIconUrl, 'https://ex.com/fav.ico');
+});
+
+test('buildRowFromTab returns empty favIconUrl when tab URL is about:blank', () => {
+  const tab = { id: 1, title: 'T', url: 'about:blank', windowId: 1, index: 0, active: false, pinned: false, audible: false, discarded: false, lastAccessed: null, favIconUrl: '' };
+  const row = buildRowFromTab(tab, {});
+  assert.equal(row.favIconUrl, '');
+});
+
+test('buildRowFromTab asserts all fields correctly', () => {
+  const tab = { id: 7, title: 'Test', url: 'https://ex.com', windowId: 5, index: 2, pinned: true, audible: true, discarded: false, lastAccessed: 1000, favIconUrl: '' };
+  const firstSeen = { 7: 900 };
+  const row = buildRowFromTab(tab, firstSeen);
+  assert.equal(row.windowId, 5);
+  assert.equal(row.index, 2);
+  assert.equal(row.title, 'Test');
+  assert.equal(row.url, 'https://ex.com');
+  assert.equal(row.pinned, true);
+  assert.equal(row.audible, true);
+  assert.equal(row.discarded, false);
+  assert.equal(row.openedAt, 900);
+  assert.equal(row.lastAccessedAt, 1000);
+  assert.equal(row.favIconUrl, 'https://ex.com/favicon.ico');
+});
+
+// --- cleanFavIconUrl additions ---
+test('cleanFavIconUrl falls through to URL derivation when favIconUrl is non-http', () => {
+  const result = cleanFavIconUrl({ favIconUrl: 'ftp://ex.com/fav.ico', url: 'https://ex.com/page' });
+  assert.equal(result, 'https://ex.com/favicon.ico');
+});
+
+test('cleanFavIconUrl falls through to URL derivation when favIconUrl is null', () => {
+  const result = cleanFavIconUrl({ favIconUrl: null, url: 'https://ex.com/page' });
+  assert.equal(result, 'https://ex.com/favicon.ico');
+});
+
+// --- toExportRow additions ---
+test('toExportRow returns empty object for empty input', () => {
+  assert.deepEqual(toExportRow({}), {});
+});
+
+test('toExportRow turns all null date fields into empty strings', () => {
+  const out = toExportRow({ title: 'A', openedAt: null, lastAccessedAt: null, url: 'x' });
+  assert.equal(out.openedAt, '');
+  assert.equal(out.lastAccessedAt, '');
+  assert.equal(out.title, 'A');
+  assert.equal(out.url, 'x');
+});
+
+// --- buildCsv additions ---
+test('buildCsv with empty rows returns only header', () => {
+  const csv = buildCsv([], ['title', 'url']);
+  assert.equal(csv, '"title","url"\r\n');
+});
+
+test('buildCsv handles numeric and boolean fields', () => {
+  const csv = buildCsv([{ title: 'A', count: 5, active: true }], ['title', 'count', 'active']);
+  assert.ok(csv.includes('5'));
+  assert.ok(csv.includes('true'));
+});
+
+// --- buildJson additions ---
+test('buildJson with empty rows returns empty array', () => {
+  assert.equal(buildJson([], ['title']), '[]');
+});
+
+test('buildJson keeps null values from missing fields', () => {
+  const json = buildJson([{ title: 'A' }], ['title', 'url']);
+  const parsed = JSON.parse(json);
+  assert.equal(parsed[0].url, null);
+});
+
+// --- sortRows additions ---
+test('sortRows returns empty array for empty input', () => {
+  assert.deepEqual(sortRows([], 'accessOld'), []);
+});
+
+test('sortRows returns single row unchanged', () => {
+  const rows = [{ id: 1, title: 'Z' }];
+  assert.deepEqual(sortRows(rows, 'titleAsc'), [{ id: 1, title: 'Z' }]);
+});
+
+test('sortRows with all null dates keeps original order', () => {
+  const rows = [{ id: 1, lastAccessedAt: null }, { id: 2, lastAccessedAt: null }];
+  const out = sortRows(rows, 'accessOld');
+  assert.equal(out[0].id, 1);
+  assert.equal(out[1].id, 2);
+});
+
+// --- formatIso additions ---
+test('formatIso: negative ms -> ISO string', () => {
+  assert.ok(formatIso(-86400000).endsWith('Z'));
+});
+
+test('formatIso: very large ms -> ISO string ending in Z', () => {
+  assert.ok(formatIso(9999999999999).endsWith('Z'));
+});
+
+test('formatIso: NaN and Infinity both return empty string', () => {
+  assert.equal(formatIso(NaN), '');
+  assert.equal(formatIso(Infinity), '');
+});
+
+// --- buildMarkdown / buildText additions ---
+test('buildMarkdown shows domain counts when showCounts is true', () => {
+  const rows = [
+    { title: 'A', url: 'https://www.example.com/a' },
+    { title: 'B', url: 'https://www.example.com/b' },
+    { title: 'C', url: 'https://www.google.com/c' },
+  ];
+  const md = buildMarkdown(rows, ['title', 'url'], true, true);
+  assert.ok(md.includes('## example.com (2)'));
+  assert.ok(md.includes('## google.com (1)'));
+});
+
+test('buildText shows domain counts when showCounts is true', () => {
+  const rows = [
+    { title: 'A', url: 'https://www.example.com/a' },
+    { title: 'B', url: 'https://www.example.com/b' },
+    { title: 'C', url: 'https://www.google.com/c' },
+  ];
+  const txt = buildText(rows, ['title', 'url'], true, true);
+  assert.ok(txt.includes('=== example.com (2) ==='));
+  assert.ok(txt.includes('=== google.com (1) ==='));
+});
+
+// --- domainOf additions ---
+test('domainOf strips www. from subdomain', () => {
+  assert.equal(domainOf('https://www.www.example.com/page'), 'www.example.com');
+});
