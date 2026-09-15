@@ -46,7 +46,7 @@
 
   "status_copied": { "message": "Copied ✓" },
   "status_copy_failed": { "message": "❌ Failed to copy" },
-  "status_saved": { "message": "✅ File saved" },
+  "status_saved": { "message": "File saved ✓" },
   "status_save_failed": { "message": "❌ Save error" },
 
   "preview_empty_fields": { "message": "(select at least one field)" },

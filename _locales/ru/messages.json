@@ -46,7 +46,7 @@
 
   "status_copied": { "message": "Скопировано ✓" },
   "status_copy_failed": { "message": "❌ Не удалось скопировать" },
-  "status_saved": { "message": "✅ Файл сохранён" },
+  "status_saved": { "message": "Файл сохранён ✓" },
   "status_save_failed": { "message": "❌ Ошибка сохранения" },
 
   "preview_empty_fields": { "message": "(выберите хотя бы одно поле)" },
