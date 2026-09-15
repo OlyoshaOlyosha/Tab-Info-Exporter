@@ -312,7 +312,7 @@ async function downloadFile() {
 
 // (Re)build all visible strings and dynamic controls. Safe to call on init
 // and whenever the language changes.
-function renderAll() {
+async function renderAll() {
   els.count.textContent = tr('count_prefix') + rowCount;
   els.sortLabelText.textContent = tr('sort_label');
   els.fieldsLegend.textContent = tr('fields_label');
@@ -374,9 +374,9 @@ function updateDomainCountVisibility() {
   els.showDomainCountsWrap.hidden = !useful;
 }
 
-function onAnyChange() {
+async function onAnyChange() {
   updateDomainCountVisibility();
-  saveSettings();
+  await saveSettings();
   renderPreview();
 }
 
@@ -384,8 +384,8 @@ async function applyLang(lang) {
   currentLang = lang;
   const M = await loadMessages(lang);
   tr = (k) => t(M, k);
-  renderAll();
-  onAnyChange();
+  await renderAll();
+  await onAnyChange();
 }
 
 async function init() {
@@ -415,7 +415,7 @@ async function init() {
   els.sort.value = currentSettings.sort;
 
   updateDomainCountVisibility();
-  renderAll();
+  await renderAll();
   renderPreview();
 }
 
@@ -452,10 +452,10 @@ els.groupByDomain.addEventListener('change', onAnyChange);
 els.showDomainCounts.addEventListener('change', onAnyChange);
 
 document.querySelectorAll('input[name="format"]').forEach((radio) => {
-  radio.addEventListener('change', (e) => {
+  radio.addEventListener('change', async (e) => {
     currentFormat = e.target.value;
     updateDomainCountVisibility();
-    saveSettings();
+    await saveSettings();
     renderPreview();
   });
 });
