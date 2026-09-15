@@ -5,4 +5,5 @@ web-ext-artifacts/
 
 # AI config
 .opencode/
+.serena
 AGENTS.md
