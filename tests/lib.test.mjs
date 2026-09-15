@@ -4,6 +4,9 @@ import {
   FIELD_DEFS,
   SORT_DEFS,
   formatIso,
+  cleanFavIconUrl,
+  toExportRow,
+  buildRowFromTab,
   csvCell,
   buildCsv,
   buildJson,
@@ -140,7 +143,7 @@ test('formatIso: finite ms -> ISO string, null/undefined -> empty', () => {
 
 test('FIELD_DEFS / SORT_DEFS are ordered exports', () => {
   assert.equal(FIELD_DEFS[0].key, 'title');
-  assert.equal(SORT_DEFS[0].key, 'accessOld');
+  assert.equal(SORT_DEFS[0].key, 'titleAsc');
 });
 
 // --- domainOf tests ---
@@ -302,4 +305,55 @@ test('buildText renders title-only as plain text', () => {
   const rows = [{ title: 'A' }];
   const txt = buildText(rows, ['title'], false);
   assert.ok(txt.includes('A'));
+});
+
+// --- cleanFavIconUrl tests ---
+test('cleanFavIconUrl keeps http(s) favIconUrl as-is', () => {
+  assert.equal(cleanFavIconUrl({ favIconUrl: 'https://ex.com/fav.ico', url: 'https://ex.com' }), 'https://ex.com/fav.ico');
+});
+test('cleanFavIconUrl derives favicon.ico from tab origin', () => {
+  assert.equal(cleanFavIconUrl({ favIconUrl: '', url: 'https://example.com/page' }), 'https://example.com/favicon.ico');
+});
+test('cleanFavIconUrl returns empty for non-http(s) tab URL', () => {
+  assert.equal(cleanFavIconUrl({ favIconUrl: '', url: 'about:blank' }), '');
+});
+test('cleanFavIconUrl returns empty when tab URL is invalid', () => {
+  assert.equal(cleanFavIconUrl({ favIconUrl: '', url: 'not-a-url' }), '');
+});
+
+// --- toExportRow tests ---
+test('toExportRow converts date fields to ISO strings', () => {
+  const row = { title: 'A', openedAt: 1700000000000, lastAccessedAt: 1700000000000, url: 'https://ex.com' };
+  const out = toExportRow(row);
+  assert.equal(out.title, 'A');
+  assert.ok(typeof out.openedAt === 'string' && out.openedAt.endsWith('Z'));
+  assert.ok(typeof out.lastAccessedAt === 'string' && out.lastAccessedAt.endsWith('Z'));
+  assert.equal(out.url, 'https://ex.com');
+});
+test('toExportRow leaves non-date fields unchanged', () => {
+  const row = { title: 'A', id: 1, active: true };
+  const out = toExportRow(row);
+  assert.deepEqual(out, { title: 'A', id: 1, active: true });
+});
+test('toExportRow turns null date fields into empty string', () => {
+  const out = toExportRow({ title: 'A', openedAt: null, lastAccessedAt: undefined });
+  assert.equal(out.openedAt, '');
+  assert.equal(out.lastAccessedAt, '');
+});
+
+// --- buildRowFromTab tests ---
+test('buildRowFromTab constructs a row from tab + firstSeen', () => {
+  const tab = { id: 42, title: 'A', url: 'https://ex.com', lastAccessed: 1700000000000, active: true, pinned: false, windowId: 1, index: 0, audible: false, discarded: false, favIconUrl: '' };
+  const firstSeen = { 42: 1600000000000 };
+  const row = buildRowFromTab(tab, firstSeen);
+  assert.equal(row.openedAt, 1600000000000);
+  assert.equal(row.lastAccessedAt, 1700000000000);
+  assert.equal(row.favIconUrl, 'https://ex.com/favicon.ico');
+  assert.equal(row.active, true);
+});
+test('buildRowFromTab returns null openedAt when tab id not in firstSeen', () => {
+  const tab = { id: 99, title: 'A', url: 'https://ex.com', lastAccessed: null, active: false, pinned: false, windowId: 1, index: 0, audible: false, discarded: false, favIconUrl: '' };
+  const row = buildRowFromTab(tab, {});
+  assert.equal(row.openedAt, null);
+  assert.equal(row.lastAccessedAt, null);
 });

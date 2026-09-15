@@ -11,7 +11,9 @@ import {
   buildText,
   domainOf,
   sortRows,
-  formatIso,
+  cleanFavIconUrl,
+  toExportRow,
+  buildRowFromTab,
 } from './lib.js';
 import {
   DEFAULT_LANG,
@@ -86,51 +88,12 @@ let rowCount = 0;
 let currentFormat = 'csv';
 let currentSettings = { ...DEFAULT_SETTINGS };
 
-const DATE_KEYS = new Set(['openedAt', 'lastAccessedAt']);
-
-function toExportRow(r) {
-  const out = {};
-  for (const k in r) out[k] = DATE_KEYS.has(k) ? formatIso(r[k]) : r[k];
-  return out;
-}
-
-function setStatus(msg) {
-  els.status.textContent = msg;
-}
-
 // Briefly flash feedback on the given button (icon stays via ::before),
 // then revert to the original label after `ms` milliseconds.
 function flashButton(btn, text, revertText, ms = 1500) {
   btn.textContent = text;
   clearTimeout(btn._flashTimer);
   btn._flashTimer = setTimeout(() => { btn.textContent = revertText; }, ms);
-}
-
-function cleanFavIconUrl(tab) {
-  const fav = tab.favIconUrl;
-  if (fav && (fav.startsWith('http://') || fav.startsWith('https://'))) return fav;
-  try {
-    const u = new URL(tab.url);
-    if (u.protocol === 'http:' || u.protocol === 'https:') return u.origin + '/favicon.ico';
-  } catch {}
-  return '';
-}
-
-function buildRowFromTab(tab, firstSeen) {
-  return {
-    id: tab.id,
-    windowId: tab.windowId,
-    index: tab.index,
-    title: tab.title,
-    url: tab.url,
-    openedAt: (tab.id != null && firstSeen[tab.id]) || null,
-    lastAccessedAt: tab.lastAccessed ?? null,
-    active: tab.active,
-    pinned: tab.pinned,
-    audible: tab.audible,
-    discarded: tab.discarded,
-    favIconUrl: cleanFavIconUrl(tab),
-  };
 }
 
 function getSelectedFields() {

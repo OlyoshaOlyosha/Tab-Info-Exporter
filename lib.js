@@ -38,6 +38,49 @@ export function formatIso(ms) {
   return Number.isFinite(ms) ? new Date(ms).toISOString() : '';
 }
 
+// Tab fields that carry date values (epoch ms) and should be
+// serialized as ISO strings when building export rows.
+const DATE_KEYS = new Set(['openedAt', 'lastAccessedAt']);
+
+// Return a clean favicon URL: keep http(s) URLs as-is, derive
+// favicon.ico from the tab's origin, or return "" otherwise.
+export function cleanFavIconUrl(tab) {
+  const fav = tab.favIconUrl;
+  if (fav && (fav.startsWith('http://') || fav.startsWith('https://'))) return fav;
+  try {
+    const u = new URL(tab.url);
+    if (u.protocol === 'http:' || u.protocol === 'https:') return u.origin + '/favicon.ico';
+  } catch {}
+  return '';
+}
+
+// Convert an internal row (with raw ms date fields) to an export
+// row (date fields serialized as ISO strings). Pure — no browser API.
+export function toExportRow(row) {
+  const out = {};
+  for (const k in row) out[k] = DATE_KEYS.has(k) ? formatIso(row[k]) : row[k];
+  return out;
+}
+
+// Build an internal row object from a tabs.Tab + firstSeen map.
+// Pure — no browser API, no DOM.
+export function buildRowFromTab(tab, firstSeen) {
+  return {
+    id: tab.id,
+    windowId: tab.windowId,
+    index: tab.index,
+    title: tab.title,
+    url: tab.url,
+    openedAt: (tab.id != null && firstSeen[tab.id]) || null,
+    lastAccessedAt: tab.lastAccessed ?? null,
+    active: tab.active,
+    pinned: tab.pinned,
+    audible: tab.audible,
+    discarded: tab.discarded,
+    favIconUrl: cleanFavIconUrl(tab),
+  };
+}
+
 // RFC 4180 cell: every value is wrapped in double quotes; embedded quotes are
 // doubled. null/undefined -> empty quoted cell.
 export function csvCell(s) {
@@ -197,3 +240,4 @@ export function buildText(rows, fields, grouped, showCounts) {
   }
   return rows.map(renderRow).join('\n\n');
 }
+
