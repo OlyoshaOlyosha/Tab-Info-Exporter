@@ -98,6 +98,14 @@ function setStatus(msg) {
   els.status.textContent = msg;
 }
 
+// Briefly flash feedback on the given button (icon stays via ::before),
+// then revert to the original label after `ms` milliseconds.
+function flashButton(btn, text, revertText, ms = 1500) {
+  btn.textContent = text;
+  clearTimeout(btn._flashTimer);
+  btn._flashTimer = setTimeout(() => { btn.textContent = revertText; }, ms);
+}
+
 function cleanFavIconUrl(tab) {
   const fav = tab.favIconUrl;
   if (fav && (fav.startsWith('http://') || fav.startsWith('https://'))) return fav;
@@ -318,9 +326,9 @@ async function copyToClipboard() {
   const payload = buildOutput(currentFormat);
   try {
     await navigator.clipboard.writeText(payload);
-    setStatus(tr('status_copied'));
+    flashButton(els.copy, tr('status_copied'), tr('copy'));
   } catch {
-    setStatus(tr('status_copy_failed'));
+    flashButton(els.copy, tr('status_copy_failed'), tr('copy'));
   }
 }
 
@@ -332,9 +340,9 @@ async function downloadFile() {
   try {
     const filename = 'tabs_' + new Date().toISOString().slice(0, 10) + ext;
     await browser.downloads.download({ url, filename, saveAs: false });
-    setStatus(tr('status_saved'));
+    flashButton(els.download, tr('status_saved'), tr('download'));
   } catch {
-    setStatus(tr('status_save_failed'));
+    flashButton(els.download, tr('status_save_failed'), tr('download'));
   } finally {
     URL.revokeObjectURL(url);
   }
