@@ -7,15 +7,17 @@ a file. It never modifies, moves, or closes tabs.
 ## Features
 
 - Export metadata for **all open tabs** across all windows in one action.
-- Output formats: **CSV**, **JSON**, **TXT**, and **Markdown**.
+- Output formats: **Markdown**, **TXT**, **JSON**, and **CSV**.
 - Send the result to the **clipboard** or **download** it as a file.
-- **Sortable** with 9 modes (by access time, open time, title, URL, or browser order).
+- **Sortable** with 9 modes (by title, URL, last visit, date opened, or browser order).
 - **Selectable fields** — choose exactly which columns to include.
 - **Group by domain** for TXT and Markdown (optional count in domain headers).
 - **Per-tab "date opened"** tracked locally by the extension (see Known limitation).
 - **Runtime UI language** switch: English, Russian, Spanish; the choice persists.
 - UI preferences (format, sort, fields, grouping, domain counts, language) are
   remembered between popup opens.
+- **Visual preview** with syntax highlighting: JSON object keys, Markdown links,
+  and CSV header rows are colorized in the preview pane.
 
 ## Requirements
 
@@ -46,9 +48,9 @@ The popup has the following controls:
 - **Tab count** — how many tabs are included in the export.
 - **Language** — English, Russian, or Spanish. Saved and restored on the next open.
 - **Sort** — one of 9 orderings (see Sort options).
-- **Fields** — 4 on by default: **Title**, **URL**, **Date opened**, **Date last
-  accessed**; the rest are optional.
-- **Format** — **CSV** (default), **JSON**, **TXT**, or **MD**.
+- **Fields** — 4 on by default: **Title**, **URL**, **Date opened**, **Date
+  visited**; the rest are optional.
+- **Format** — **MD** (default), **TXT**, **JSON**, or **CSV**.
 - **Group by domain** — groups TXT/Markdown output under domain headers. Domain
   order follows the current sort (by the first tab of each domain in the sorted
   list).
@@ -56,7 +58,7 @@ The popup has the following controls:
   grouping is on. Headers become e.g. `## github.com (12)` or
   `=== github.com (12) ===`.
 - **Copy** — writes the export to the clipboard.
-- **Download file** — saves as `tabs_YYYY-MM-DD.csv`, `.json`, `.txt`, or `.md`.
+- **Download file** — saves as `tabs_YYYY-MM-DD.md`, `.txt`, `.json`, or `.csv`.
 
 A status line at the bottom reports success or failure (e.g. "Copied", "File
 saved", or an error message).
@@ -77,33 +79,35 @@ All 12 fields are listed below. Those marked **Default** are enabled on first op
 | Title              | yes     |
 | URL                | yes     |
 | Date opened        | yes     |
-| Date last accessed | yes     |
+| Date visited       | yes     |
 | ID                 |         |
 | Window             |         |
-| Index              |         |
+| Position           |         |
 | Active             |         |
 | Pinned             |         |
-| Audible            |         |
+| Sound              |         |
 | Discarded          |         |
-| Favicon URL        |         |
+| Favicon            |         |
 
 ## Sort options
 
+Listed in the order they appear in the popup:
+
 | Mode                          |
 | ----------------------------- |
-| Last accessed: oldest first   |
-| Last accessed: newest first   |
-| Date opened: oldest first     |
-| Date opened: newest first     |
 | Title A→Z                     |
 | Title Z→A                     |
 | URL A→Z                       |
 | URL Z→A                       |
+| Last visited: newest first    |
+| Last visited: oldest first    |
+| Date opened: newest first     |
+| Date opened: oldest first     |
 | Browser order                 |
 
 For date-based sorts, tabs without a known date always sink to the bottom
 regardless of direction. "Browser order" sorts by window, then by position
-within the window — this is the default selection.
+within the window. The default sort is **Last visited: oldest first**.
 
 ## Data & privacy
 
@@ -127,6 +131,9 @@ last browser restart), not the real creation time:
 - Session-restored tabs get the restart moment.
 
 This matches comparable extensions; the extension does not invent a creation date.
+
+**Date visited** maps directly to Firefox's `tabs.Tab.lastAccessed`, which is
+maintained by the browser itself.
 
 ## Icons
 
