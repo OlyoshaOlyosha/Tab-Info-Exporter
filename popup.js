@@ -37,7 +37,6 @@ const els = {
   download: document.getElementById('download'),
   lang: document.getElementById('lang'),
   langLabelText: document.getElementById('langLabelText'),
-  status: document.getElementById('status'),
   preview: document.getElementById('preview'),
   groupByDomain: document.getElementById('groupByDomain'),
   groupByDomainLabel: document.getElementById('groupByDomainLabel'),
@@ -350,10 +349,9 @@ function renderAll() {
   }
   els.sort.value = prevSort;
 
-  // Field checkboxes.
-  const selectedFields = new Set(
-    getSelectedFields().length ? getSelectedFields() : currentSettings.fields
-  );
+   // Field checkboxes.
+   const checkedFields = getSelectedFields();
+   const selectedFields = new Set(checkedFields.length ? checkedFields : currentSettings.fields);
   els.fields.replaceChildren();
   for (const f of FIELD_DEFS) {
     const label = document.createElement('label');
