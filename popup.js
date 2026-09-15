@@ -39,6 +39,7 @@ const els = {
   preview: document.getElementById('preview'),
   groupByDomain: document.getElementById('groupByDomain'),
   groupByDomainLabel: document.getElementById('groupByDomainLabel'),
+  groupingLegend: document.getElementById('groupingLegend'),
   showDomainCounts: document.getElementById('showDomainCounts'),
   showDomainCountsLabel: document.getElementById('showDomainCountsLabel'),
   showDomainCountsWrap: document.getElementById('showDomainCountsWrap'),
@@ -298,6 +299,21 @@ function renderPreview() {
   }
 }
 
+// Cap the preview's height so its bottom border lands at the bottom of the
+// last fieldset in the controls column. Measured from #preview's top (not
+// the column's top — the format block above the preview offsets them).
+// Uses requestAnimationFrame so layout is settled after replaceChildren().
+function syncPreviewHeight() {
+  requestAnimationFrame(() => {
+    const last = document.querySelector('.controls-col > fieldset:last-of-type');
+    if (!last) return;
+    const top = els.preview.getBoundingClientRect().top;
+    const bottom = last.getBoundingClientRect().bottom;
+    els.preview.style.maxHeight = Math.max(80, Math.round(bottom - top)) + 'px';
+  });
+}
+window.addEventListener('resize', syncPreviewHeight);
+
 async function copyToClipboard() {
   const payload = buildOutput(currentFormat);
   try {
@@ -339,7 +355,8 @@ function renderAll() {
   els.download.textContent = tr('download');
   els.langLabelText.textContent = tr('lang_label');
   els.groupByDomainLabel.textContent = tr('groupByDomain');
-    els.showDomainCountsLabel.textContent = tr('showDomainCounts');
+  els.groupingLegend.textContent = tr('grouping_label');
+  els.showDomainCountsLabel.textContent = tr('showDomainCounts');
 
   // Language options.
   els.lang.replaceChildren();
@@ -377,6 +394,8 @@ function renderAll() {
     label.append(cb, ' ' + tr(f.msgKey));
     els.fields.appendChild(label);
   }
+
+  syncPreviewHeight();
 }
 
 function updateDomainCountVisibility() {

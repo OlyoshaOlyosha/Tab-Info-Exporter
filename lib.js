@@ -22,14 +22,14 @@ export const FIELD_DEFS = [
 export const DEFAULT_FIELD_KEYS = ['title', 'url', 'openedAt', 'lastAccessedAt'];
 
 export const SORT_DEFS = [
-  { key: 'accessOld', msgKey: 'sort_accessOld' },
-  { key: 'accessNew', msgKey: 'sort_accessNew' },
-  { key: 'openOld', msgKey: 'sort_openOld' },
-  { key: 'openNew', msgKey: 'sort_openNew' },
   { key: 'titleAsc', msgKey: 'sort_titleAsc' },
   { key: 'titleDesc', msgKey: 'sort_titleDesc' },
   { key: 'urlAsc', msgKey: 'sort_urlAsc' },
   { key: 'urlDesc', msgKey: 'sort_urlDesc' },
+  { key: 'accessNew', msgKey: 'sort_accessNew' },
+  { key: 'accessOld', msgKey: 'sort_accessOld' },
+  { key: 'openNew', msgKey: 'sort_openNew' },
+  { key: 'openOld', msgKey: 'sort_openOld' },
   { key: 'browserOrder', msgKey: 'sort_browserOrder' },
 ];
 
